@@ -144,8 +144,8 @@ class IQMHardwareExecutor:
         self.client_secret = client_secret or os.getenv("IQM_CLIENT_SECRET", "")
 
         # Try API key
-        self.api_key = api_key or os.getenv("IQM_API_KEY", "")
-        self.api_url = api_url or os.getenv("IQM_API_URL", "https://api.resonance.meetiqm.com")
+        self.api_key = api_key or os.getenv("IQM_API_KEY", "") or os.getenv("RESONANCE_API_TOKEN", "")
+        self.api_url = api_url or os.getenv("IQM_API_URL", "https://resonance.meetiqm.com")
 
         # Determine auth method
         self.auth_method = None
@@ -341,15 +341,22 @@ class IQMHardwareExecutor:
         for circuit in circuits:
             logger.info(f"  Submitting {circuit.name}...")
 
+            # Preprocess QASM to add include statement if missing
+            qasm = circuit.qasm
+            if "include" not in qasm and qasm.startswith("OPENQASM 3.0"):
+                # Add stdgates.inc after header
+                lines = qasm.split("\n")
+                lines.insert(1, 'include "stdgates.inc";')
+                qasm = "\n".join(lines)
+
             # Create job
             payload = {
-                "circuit": circuit.qasm,
+                "circuits": [qasm],
                 "shots": shots,
-                "backend": backend,
             }
 
             response = requests.post(
-                f"{self.api_url}/jobs",
+                f"{self.api_url}/api/v1/jobs/garnet:mock/circuit",
                 json=payload,
                 headers=headers,
                 timeout=30,
@@ -371,7 +378,7 @@ class IQMHardwareExecutor:
             max_polls = 300  # 10 minutes with 2-second intervals
             for poll_count in range(max_polls):
                 response = requests.get(
-                    f"{self.api_url}/jobs/{job_id}",
+                    f"{self.api_url}/api/v1/jobs/{job_id}",
                     headers=headers,
                     timeout=30,
                 )

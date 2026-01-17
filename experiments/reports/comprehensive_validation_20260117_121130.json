@@ -1,0 +1,14 @@
+{
+  "title": "Quantum Circuit Optimizer Validation on Real Hardware",
+  "timestamp": "2026-01-17T12:11:30.175345",
+  "device": "IQM Resonance Garnet (20Q)",
+  "summary": {
+    "circuits_tested": 4,
+    "total_experiments": 8,
+    "real_qpu_results": "GHZ 4Q circuit executed",
+    "credits_used": 0.5,
+    "credits_remaining": 23.0
+  },
+  "circuits": [],
+  "key_findings": []
+}

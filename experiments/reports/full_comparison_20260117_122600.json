@@ -1,0 +1,31 @@
+{
+  "title": "Full Hardware Comparison: Original vs Optimized Circuits",
+  "timestamp": "2026-01-17T12:26:00.769291",
+  "device": "IQM Resonance Garnet (20Q)",
+  "configuration": {
+    "circuits_tested": 4,
+    "jobs_executed": 1,
+    "shots_per_circuit": 160,
+    "optimization_passes": [
+      "cancel",
+      "commute",
+      "rotate"
+    ]
+  },
+  "jobs": [
+    {
+      "job_index": 1,
+      "circuit_name": "ghz_4q",
+      "version": "original",
+      "num_qubits": 4,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:25:40.098144",
+      "execution_time_ms": 18533.148765563965,
+      "fidelity": 0.4875,
+      "result_counts": null
+    }
+  ],
+  "summary": {}
+}

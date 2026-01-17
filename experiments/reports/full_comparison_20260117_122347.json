@@ -1,0 +1,70 @@
+{
+  "title": "Full Hardware Comparison: Original vs Optimized Circuits",
+  "timestamp": "2026-01-17T12:23:47.853405",
+  "device": "IQM Resonance Garnet (20Q)",
+  "configuration": {
+    "circuits_tested": 4,
+    "jobs_executed": 4,
+    "shots_per_circuit": 160,
+    "optimization_passes": [
+      "cancel",
+      "commute",
+      "rotate"
+    ]
+  },
+  "jobs": [
+    {
+      "job_index": 1,
+      "circuit_name": "ghz_4q",
+      "version": "original",
+      "num_qubits": 4,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:23:24.828483",
+      "execution_time_ms": 16299.362421035767,
+      "fidelity": 0.51875,
+      "result_counts": null
+    },
+    {
+      "job_index": 2,
+      "circuit_name": "ghz_8q",
+      "version": "original",
+      "num_qubits": 8,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:23:31.689444",
+      "execution_time_ms": 5852.895975112915,
+      "fidelity": 0.40625,
+      "result_counts": null
+    },
+    {
+      "job_index": 3,
+      "circuit_name": "ghz_12q",
+      "version": "original",
+      "num_qubits": 12,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:23:38.959531",
+      "execution_time_ms": 6259.959697723389,
+      "fidelity": 0.3375,
+      "result_counts": null
+    },
+    {
+      "job_index": 4,
+      "circuit_name": "qft_4q",
+      "version": "original",
+      "num_qubits": 4,
+      "circuit_type": "qft",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:23:46.843318",
+      "execution_time_ms": 6873.118162155151,
+      "fidelity": 0.1125,
+      "result_counts": null
+    }
+  ],
+  "summary": {}
+}

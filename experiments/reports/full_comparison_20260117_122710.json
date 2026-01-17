@@ -1,0 +1,164 @@
+{
+  "title": "Full Hardware Comparison: Original vs Optimized Circuits",
+  "timestamp": "2026-01-17T12:27:10.300131",
+  "device": "IQM Resonance Garnet (20Q)",
+  "configuration": {
+    "circuits_tested": 4,
+    "jobs_executed": 8,
+    "shots_per_circuit": 160,
+    "optimization_passes": [
+      "cancel",
+      "commute",
+      "rotate"
+    ]
+  },
+  "jobs": [
+    {
+      "job_index": 1,
+      "circuit_name": "ghz_4q",
+      "version": "original",
+      "num_qubits": 4,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:26:20.442936",
+      "execution_time_ms": 15293.05911064148,
+      "fidelity": 0.49375,
+      "result_counts": null
+    },
+    {
+      "job_index": 2,
+      "circuit_name": "ghz_4q",
+      "version": "optimized",
+      "num_qubits": 4,
+      "circuit_type": "ghz",
+      "has_optimization_data": true,
+      "optimization_metrics": {
+        "original_gates": 4,
+        "optimized_gates": 4,
+        "gate_reduction": 0.0,
+        "original_depth": 4,
+        "optimized_depth": 4,
+        "depth_reduction": 0.0,
+        "original_2q_gates": 3,
+        "optimized_2q_gates": 3
+      },
+      "submitted_at": "2026-01-17T12:26:28.123941",
+      "execution_time_ms": 7175.946474075317,
+      "fidelity": 0.46875,
+      "result_counts": null
+    },
+    {
+      "job_index": 3,
+      "circuit_name": "ghz_8q",
+      "version": "original",
+      "num_qubits": 8,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:26:35.087874",
+      "execution_time_ms": 6463.747262954712,
+      "fidelity": 0.40625,
+      "result_counts": null
+    },
+    {
+      "job_index": 4,
+      "circuit_name": "ghz_8q",
+      "version": "optimized",
+      "num_qubits": 8,
+      "circuit_type": "ghz",
+      "has_optimization_data": true,
+      "optimization_metrics": {
+        "original_gates": 8,
+        "optimized_gates": 8,
+        "gate_reduction": 0.0,
+        "original_depth": 8,
+        "optimized_depth": 8,
+        "depth_reduction": 0.0,
+        "original_2q_gates": 7,
+        "optimized_2q_gates": 7
+      },
+      "submitted_at": "2026-01-17T12:26:42.562642",
+      "execution_time_ms": 6969.651937484741,
+      "fidelity": 0.375,
+      "result_counts": null
+    },
+    {
+      "job_index": 5,
+      "circuit_name": "ghz_12q",
+      "version": "original",
+      "num_qubits": 12,
+      "circuit_type": "ghz",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:26:50.141877",
+      "execution_time_ms": 7079.049110412598,
+      "fidelity": 0.25625,
+      "result_counts": null
+    },
+    {
+      "job_index": 6,
+      "circuit_name": "ghz_12q",
+      "version": "optimized",
+      "num_qubits": 12,
+      "circuit_type": "ghz",
+      "has_optimization_data": true,
+      "optimization_metrics": {
+        "original_gates": 12,
+        "optimized_gates": 12,
+        "gate_reduction": 0.0,
+        "original_depth": 12,
+        "optimized_depth": 12,
+        "depth_reduction": 0.0,
+        "original_2q_gates": 11,
+        "optimized_2q_gates": 11
+      },
+      "submitted_at": "2026-01-17T12:26:56.899862",
+      "execution_time_ms": 6253.382921218872,
+      "fidelity": 0.2875,
+      "result_counts": null
+    },
+    {
+      "job_index": 7,
+      "circuit_name": "qft_4q",
+      "version": "original",
+      "num_qubits": 4,
+      "circuit_type": "qft",
+      "has_optimization_data": false,
+      "optimization_metrics": null,
+      "submitted_at": "2026-01-17T12:27:03.861832",
+      "execution_time_ms": 6461.763143539429,
+      "fidelity": 0.1,
+      "result_counts": null
+    },
+    {
+      "job_index": 8,
+      "circuit_name": "qft_4q",
+      "version": "optimized",
+      "num_qubits": 4,
+      "circuit_type": "qft",
+      "has_optimization_data": true,
+      "optimization_metrics": {
+        "original_gates": 30,
+        "optimized_gates": 9,
+        "gate_reduction": 70.0,
+        "original_depth": 21,
+        "optimized_depth": 3,
+        "depth_reduction": 85.71428571428572,
+        "original_2q_gates": 14,
+        "optimized_2q_gates": 2
+      },
+      "submitted_at": "2026-01-17T12:27:09.799747",
+      "execution_time_ms": 5433.235645294189,
+      "fidelity": 0.0875,
+      "result_counts": null
+    }
+  ],
+  "summary": {
+    "original_circuits": 4,
+    "optimized_circuits": 4,
+    "avg_fidelity_original": 0.3140625,
+    "avg_fidelity_optimized": 0.3046875,
+    "fidelity_improvement": -0.009375000000000022
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Full Hardware Comparison: Original vs Optimized Circuits",
+  "timestamp": "2026-01-17T12:21:30.128382",
+  "device": "IQM Resonance Garnet (20Q)",
+  "configuration": {
+    "circuits_tested": 4,
+    "jobs_executed": 0,
+    "shots_per_circuit": 160,
+    "optimization_passes": [
+      "cancel",
+      "commute",
+      "rotate"
+    ]
+  },
+  "jobs": [],
+  "summary": {}
+}

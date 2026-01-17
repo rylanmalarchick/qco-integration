@@ -272,8 +272,9 @@ class IQMHardwareExecutor:
                 counts = result.get_counts()
 
                 # Create hardware result
+                circuit_name = circuit.spec.name if hasattr(circuit, 'spec') else circuit.name
                 hw_result = HardwareResult(
-                    circuit_name=circuit.name,
+                    circuit_name=circuit_name,
                     circuit_qasm=circuit.qasm,
                     shots=shots,
                     counts=counts,

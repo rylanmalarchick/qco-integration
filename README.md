@@ -8,7 +8,23 @@ This project provides an orchestration layer for analyzing fidelity degradation 
 
 ## Project Status
 
-**Phase 1: Integration Layer Infrastructure** - Scaffolding complete, implementation pending
+**Phase 5: Complete** ✓ - End-to-end framework operational with real components and hardware validation support
+
+### Completed Phases
+
+1. **Integration Architecture** - C++ optimizer + Python pulse simulation connected
+2. **Real Component Integration** - Working with actual quantum-circuit-optimizer binary
+3. **Experimental Campaign** - 371 circuits analyzed with real optimization + Lindblad simulation
+4. **Publication-Ready Paper** - 5-page arXiv preprint with real experimental results
+5. **Hardware Validation** - IQM Resonance integration with dry-run credit estimation
+
+### Key Results
+
+- **23.1% mean gate reduction** (max 96.2%)
+- **CancellationPass most effective** (14,024 gates, 68% improved)
+- **Pulse duration strongest fidelity predictor** (r=-0.74, R²=0.55)
+- **251 passing tests**, clean linting
+- **Free-tier hardware validation** fits in 30 credits/month
 
 ## Installation
 
@@ -37,14 +53,23 @@ qco-integration/
 ├── src/                  # Source code
 │   ├── bridge.py         # CircuitOptimizerBridge (C++ subprocess)
 │   ├── pipeline.py       # EndToEndPipeline (orchestration)
+│   ├── pulse.py          # PulseSimulator (Lindblad-based)
+│   ├── hardware.py       # IQMHardwareExecutor (validation)
 │   ├── corpus.py         # CircuitCorpus (benchmarks)
 │   ├── metrics.py        # Dataclasses for metrics
 │   ├── runner.py         # BenchmarkRunner
+│   ├── analysis.py       # Statistical analysis
+│   ├── qasm.py           # QASM utilities
 │   └── visualization.py  # Plotting utilities
-├── experiments/          # Experiment configurations
+├── experiments/          # Experiment scripts
+│   ├── run_campaign.py   # Full experimental campaign
+│   ├── hardware_dryrun.py # Credit estimation (no credentials needed!)
+│   └── hardware_validate.py # Hardware execution
 ├── results/              # Output data (gitignored)
-├── paper/                # LaTeX preprint
-└── tests/                # Test suite
+├── paper/                # LaTeX preprint (ready to submit)
+├── tests/                # 251 passing tests
+├── HARDWARE_VALIDATION.md # Hardware validation guide
+└── README.md
 ```
 
 ## Dependencies
@@ -58,6 +83,30 @@ qco-integration/
 - **QubitPulseOpt**: Python pulse optimization library
   - Location: See `QUBIT_PULSE_OPT_PATH` in `.env`
   - Required for: Pulse compilation, noise simulation
+
+## Quick Start: Hardware Validation
+
+Test the full pipeline on real quantum hardware (IQM Resonance - FREE):
+
+```bash
+# 1. Estimate credits needed (no credentials required!)
+python experiments/hardware_dryrun.py --num-circuits 10
+
+# Output:
+# Estimated total cost:  0.9 credits
+# Within free tier:      ✓ YES
+
+# 2. Sign up for free tier: https://resonance.meetiqm.com/signup
+
+# 3. Set credentials
+export IQM_CLIENT_ID='your-client-id'
+export IQM_CLIENT_SECRET='your-client-secret'
+
+# 4. Run hardware validation
+python experiments/hardware_validate.py --num-circuits 10 --shots 1000
+```
+
+See [HARDWARE_VALIDATION.md](HARDWARE_VALIDATION.md) for detailed guide.
 
 ## Development
 

@@ -1,0 +1,451 @@
+{
+  "experiment_name": "routing_no_route",
+  "config": {
+    "name": "routing_impact_no_route",
+    "description": "Optimization without routing",
+    "passes_configs": [
+      [
+        "cancel",
+        "commute",
+        "rotate"
+      ]
+    ],
+    "topology": "iqm-garnet",
+    "route": false,
+    "parallel": false,
+    "max_workers": 4,
+    "output_dir": "results/raw",
+    "seed": 42,
+    "noise_params": {
+      "t1_ns": 37000.0,
+      "t2_ns": 9600.0,
+      "single_qubit_error": 0.001,
+      "two_qubit_error": 0.006
+    }
+  },
+  "start_time": "2026-01-16T19:11:30.668691",
+  "end_time": "2026-01-16T19:11:30.781380",
+  "success_count": 19,
+  "error_count": 0,
+  "total_duration_seconds": 0.112689,
+  "results": [
+    {
+      "circuit_name": "ghz_4q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.003557,
+      "error": null,
+      "metrics": {
+        "circuit_name": "ghz_4q",
+        "process_fidelity": 0.9482234690402318,
+        "state_fidelity": 0.8835357398401847,
+        "input_gates": 4,
+        "input_depth": 4,
+        "input_qubits": 4,
+        "post_opt_gates": 4,
+        "post_opt_depth": 4,
+        "pulse_duration_ns": 140.0,
+        "pulse_count": 4
+      }
+    },
+    {
+      "circuit_name": "ghz_8q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.003768,
+      "error": null,
+      "metrics": {
+        "circuit_name": "ghz_8q",
+        "process_fidelity": 0.8876130824051455,
+        "state_fidelity": 0.7628539846749345,
+        "input_gates": 8,
+        "input_depth": 8,
+        "input_qubits": 8,
+        "post_opt_gates": 8,
+        "post_opt_depth": 8,
+        "pulse_duration_ns": 300.0,
+        "pulse_count": 8
+      }
+    },
+    {
+      "circuit_name": "ghz_12q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.003975,
+      "error": null,
+      "metrics": {
+        "circuit_name": "ghz_12q",
+        "process_fidelity": 0.830876908007996,
+        "state_fidelity": 0.6586560969674959,
+        "input_gates": 12,
+        "input_depth": 12,
+        "input_qubits": 12,
+        "post_opt_gates": 12,
+        "post_opt_depth": 12,
+        "pulse_duration_ns": 460.0,
+        "pulse_count": 12
+      }
+    },
+    {
+      "circuit_name": "ghz_16q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.00383,
+      "error": null,
+      "metrics": {
+        "circuit_name": "ghz_16q",
+        "process_fidelity": 0.7777673064374899,
+        "state_fidelity": 0.5686905525666451,
+        "input_gates": 16,
+        "input_depth": 16,
+        "input_qubits": 16,
+        "post_opt_gates": 16,
+        "post_opt_depth": 16,
+        "pulse_duration_ns": 620.0,
+        "pulse_count": 16
+      }
+    },
+    {
+      "circuit_name": "ghz_20q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004153,
+      "error": null,
+      "metrics": {
+        "circuit_name": "ghz_20q",
+        "process_fidelity": 0.7280524673784855,
+        "state_fidelity": 0.49101336200720863,
+        "input_gates": 20,
+        "input_depth": 20,
+        "input_qubits": 20,
+        "post_opt_gates": 20,
+        "post_opt_depth": 20,
+        "pulse_duration_ns": 780.0,
+        "pulse_count": 20
+      }
+    },
+    {
+      "circuit_name": "qft_4q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004291,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qft_4q",
+        "process_fidelity": 0.943274680500067,
+        "state_fidelity": 0.8443775749793649,
+        "input_gates": 30,
+        "input_depth": 21,
+        "input_qubits": 4,
+        "post_opt_gates": 9,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 220.0,
+        "pulse_count": 9
+      }
+    },
+    {
+      "circuit_name": "qft_8q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.006316,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qft_8q",
+        "process_fidelity": 0.8865481108375853,
+        "state_fidelity": 0.7032901427565659,
+        "input_gates": 124,
+        "input_depth": 49,
+        "input_qubits": 8,
+        "post_opt_gates": 19,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 460.0,
+        "pulse_count": 19
+      }
+    },
+    {
+      "circuit_name": "qft_12q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.008999,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qft_12q",
+        "process_fidelity": 0.8332329586256034,
+        "state_fidelity": 0.5857770736161939,
+        "input_gates": 282,
+        "input_depth": 77,
+        "input_qubits": 12,
+        "post_opt_gates": 29,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 700.0,
+        "pulse_count": 29
+      }
+    },
+    {
+      "circuit_name": "qft_16q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.012549,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qft_16q",
+        "process_fidelity": 0.7831240683419234,
+        "state_fidelity": 0.48789931653161706,
+        "input_gates": 504,
+        "input_depth": 105,
+        "input_qubits": 16,
+        "post_opt_gates": 39,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 940.0,
+        "pulse_count": 39
+      }
+    },
+    {
+      "circuit_name": "qft_20q",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.017129,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qft_20q",
+        "process_fidelity": 0.7360286220890744,
+        "state_fidelity": 0.40637599829997556,
+        "input_gates": 790,
+        "input_depth": 133,
+        "input_qubits": 20,
+        "post_opt_gates": 49,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 1180.0,
+        "pulse_count": 49
+      }
+    },
+    {
+      "circuit_name": "qaoa_4q_p1_g0.50_b0.50",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004031,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qaoa_4q_p1_g0.50_b0.50",
+        "process_fidelity": 0.964405198709179,
+        "state_fidelity": 0.8721907747578861,
+        "input_gates": 17,
+        "input_depth": 8,
+        "input_qubits": 4,
+        "post_opt_gates": 10,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 200.0,
+        "pulse_count": 10
+      }
+    },
+    {
+      "circuit_name": "qaoa_8q_p1_g0.50_b0.50",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004691,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qaoa_8q_p1_g0.50_b0.50",
+        "process_fidelity": 0.9233598665333231,
+        "state_fidelity": 0.7401935141658029,
+        "input_gates": 61,
+        "input_depth": 32,
+        "input_qubits": 8,
+        "post_opt_gates": 22,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 440.0,
+        "pulse_count": 22
+      }
+    },
+    {
+      "circuit_name": "qaoa_12q_p1_g0.50_b0.50",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.006726,
+      "error": null,
+      "metrics": {
+        "circuit_name": "qaoa_12q_p1_g0.50_b0.50",
+        "process_fidelity": 0.8840614342037983,
+        "state_fidelity": 0.6281727051804809,
+        "input_gates": 132,
+        "input_depth": 47,
+        "input_qubits": 12,
+        "post_opt_gates": 34,
+        "post_opt_depth": 3,
+        "pulse_duration_ns": 680.0,
+        "pulse_count": 34
+      }
+    },
+    {
+      "circuit_name": "random_4q_d5_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.003843,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_4q_d5_density0.3",
+        "process_fidelity": 0.8636341482336589,
+        "state_fidelity": 0.7057959955763695,
+        "input_gates": 12,
+        "input_depth": 5,
+        "input_qubits": 4,
+        "post_opt_gates": 12,
+        "post_opt_depth": 5,
+        "pulse_duration_ns": 400.0,
+        "pulse_count": 12
+      }
+    },
+    {
+      "circuit_name": "random_4q_d10_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004179,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_4q_d10_density0.3",
+        "process_fidelity": 0.8302184766867258,
+        "state_fidelity": 0.5778212626543768,
+        "input_gates": 34,
+        "input_depth": 10,
+        "input_qubits": 4,
+        "post_opt_gates": 30,
+        "post_opt_depth": 10,
+        "pulse_duration_ns": 720.0,
+        "pulse_count": 30
+      }
+    },
+    {
+      "circuit_name": "random_4q_d20_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.004855,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_4q_d20_density0.3",
+        "process_fidelity": 0.7339641372021591,
+        "state_fidelity": 0.36297154567240114,
+        "input_gates": 74,
+        "input_depth": 20,
+        "input_qubits": 4,
+        "post_opt_gates": 64,
+        "post_opt_depth": 20,
+        "pulse_duration_ns": 1400.0,
+        "pulse_count": 64
+      }
+    },
+    {
+      "circuit_name": "random_8q_d5_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.00373,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_8q_d5_density0.3",
+        "process_fidelity": 0.8090902787508756,
+        "state_fidelity": 0.5517976795475058,
+        "input_gates": 32,
+        "input_depth": 5,
+        "input_qubits": 8,
+        "post_opt_gates": 30,
+        "post_opt_depth": 5,
+        "pulse_duration_ns": 760.0,
+        "pulse_count": 30
+      }
+    },
+    {
+      "circuit_name": "random_8q_d10_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.005169,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_8q_d10_density0.3",
+        "process_fidelity": 0.71528551223285,
+        "state_fidelity": 0.346624241073669,
+        "input_gates": 72,
+        "input_depth": 10,
+        "input_qubits": 8,
+        "post_opt_gates": 64,
+        "post_opt_depth": 10,
+        "pulse_duration_ns": 1440.0,
+        "pulse_count": 64
+      }
+    },
+    {
+      "circuit_name": "random_8q_d20_density0.3",
+      "passes": [
+        "cancel",
+        "commute",
+        "rotate"
+      ],
+      "duration_seconds": 0.006555,
+      "error": null,
+      "metrics": {
+        "circuit_name": "random_8q_d20_density0.3",
+        "process_fidelity": 0.6015606456695409,
+        "state_fidelity": 0.16280864448986523,
+        "input_gates": 156,
+        "input_depth": 20,
+        "input_qubits": 8,
+        "post_opt_gates": 126,
+        "post_opt_depth": 18,
+        "pulse_duration_ns": 2600.0,
+        "pulse_count": 126
+      }
+    }
+  ]
+}

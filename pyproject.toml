@@ -1,0 +1,136 @@
+# qco-integration - Quantum Circuit Optimizer Integration Layer
+# Generated following AgentBible principles
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qco_integration"
+version = "0.1.0"
+description = "Integration layer connecting quantum-circuit-optimizer (C++) with QubitPulseOpt (Python) for end-to-end quantum compilation fidelity analysis"
+authors = [{name = "Rylan Malarchick", email = "rylan1012@gmail.com"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+keywords = ["quantum", "compilation", "optimization", "pulse", "fidelity"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pyyaml>=6.0",
+    "agentbible>=0.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+analysis = [
+    "pandas>=2.0",
+    "pyarrow>=12.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+    "jupyter>=1.0",
+]
+# QubitPulseOpt integration - install separately as it's a local package
+# See PROJECT_CONTEXT.md for installation path
+
+[project.urls]
+Repository = "https://github.com/rylanmalarchick/qco-integration"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+# ============================================================================
+# PYTEST - Test Configuration
+# ============================================================================
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "-ra",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "deterministic: marks tests requiring fixed random seed",
+    "integration: marks integration tests requiring external binaries",
+    "requires_optimizer: marks tests requiring quantum-circuit-optimizer binary",
+    "requires_pulseopt: marks tests requiring QubitPulseOpt",
+]
+
+# ============================================================================
+# RUFF - Linting (replaces flake8, isort, pyupgrade)
+# ============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "W",      # pycodestyle warnings
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+# ============================================================================
+# MYPY - Type Checking (Strict Mode)
+# ============================================================================
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["numpy.*", "scipy.*", "yaml.*", "pandas.*", "matplotlib.*", "seaborn.*"]
+ignore_missing_imports = true
+
+# ============================================================================
+# COVERAGE - Minimum Thresholds
+# ============================================================================
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+fail_under = 70

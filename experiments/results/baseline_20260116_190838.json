@@ -1,0 +1,57 @@
+{
+  "experiment_name": "baseline",
+  "config": {
+    "name": "baseline",
+    "description": "No optimization passes - baseline fidelity measurement",
+    "passes_configs": [
+      []
+    ],
+    "topology": "iqm-garnet",
+    "route": true,
+    "parallel": false,
+    "max_workers": 4,
+    "output_dir": "results/raw",
+    "seed": 42,
+    "noise_params": {
+      "t1_ns": 37000.0,
+      "t2_ns": 9600.0,
+      "single_qubit_error": 0.001,
+      "two_qubit_error": 0.006
+    }
+  },
+  "start_time": "2026-01-16T19:08:38.293159",
+  "end_time": "2026-01-16T19:08:38.294186",
+  "success_count": 0,
+  "error_count": 4,
+  "total_duration_seconds": 0.001027,
+  "results": [
+    {
+      "circuit_name": "ghz_4q",
+      "passes": [],
+      "duration_seconds": 0.000179,
+      "error": "Passes list is empty. Provide at least one pass: ['cancel', 'commute', 'identity', 'rotate']",
+      "metrics": null
+    },
+    {
+      "circuit_name": "ghz_8q",
+      "passes": [],
+      "duration_seconds": 0.000151,
+      "error": "Passes list is empty. Provide at least one pass: ['cancel', 'commute', 'identity', 'rotate']",
+      "metrics": null
+    },
+    {
+      "circuit_name": "qft_4q",
+      "passes": [],
+      "duration_seconds": 0.000217,
+      "error": "Passes list is empty. Provide at least one pass: ['cancel', 'commute', 'identity', 'rotate']",
+      "metrics": null
+    },
+    {
+      "circuit_name": "random_4q_d5_density0.3",
+      "passes": [],
+      "duration_seconds": 0.000196,
+      "error": "Passes list is empty. Provide at least one pass: ['cancel', 'commute', 'identity', 'rotate']",
+      "metrics": null
+    }
+  ]
+}

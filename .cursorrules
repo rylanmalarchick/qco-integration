@@ -1,0 +1,96 @@
+# qco-integration - AI Agent Rules
+
+This project follows AgentBible research code principles for quantum computing.
+
+## Mandatory Rules
+
+### 1. Test Before Code
+- REFUSE to write implementation without test specification
+- Write test file FIRST, then implementation
+- Ask "What are the test cases?" before writing functions
+
+### 2. Rule of 50
+- Functions must be <= 50 lines
+- If longer, STOP and refactor into smaller functions
+- Each function does ONE thing
+
+### 3. Type Everything
+- Type hints on ALL function signatures
+- Docstrings on ALL public functions (Google style)
+- Run `mypy src/` before committing
+
+### 4. Physical Validation
+- Validate physical constraints explicitly:
+  - Unitarity: U†U = I
+  - Normalization: <psi|psi> = 1
+  - Trace: tr(rho) = 1
+  - Hermiticity: H = H†
+  - Fidelity bounds: 0 <= F <= 1
+- Use agentbible validators: `from agentbible.domains.quantum import validate_unitary`
+
+### 5. No Silent Failures
+- NEVER use bare `except:`
+- ALWAYS log or re-raise with context
+- Include what failed, expected value, actual value
+
+### 6. Reproducibility
+- Set random seeds explicitly
+- Document seed values in `tests/conftest.py`
+- All experiments must be reproducible
+
+## Project-Specific Rules
+
+### External Dependencies
+- quantum-circuit-optimizer: Called via subprocess, not import
+- QubitPulseOpt: Import via PYTHONPATH (see .env.example)
+- Validate binary paths before execution
+
+### Metrics Collection
+- Use dataclasses from `src/metrics.py`
+- Validate all metrics at boundaries
+- Persist results in JSON/Parquet format
+
+### Circuit Handling
+- All circuits use OpenQASM 3.0 format
+- Validate circuit syntax before optimization
+- Track metrics at every pipeline stage
+
+## Project Structure
+
+- Source code: `src/`
+- Tests: `tests/`
+- Agent documentation: `agent_docs/`
+- Experiment configs: `experiments/configs/`
+- Results: `results/` (gitignored except .gitkeep)
+
+## Before Committing
+
+```bash
+pytest                  # Tests pass
+ruff check .            # No lint errors
+mypy src/               # No type errors
+```
+
+## CI/CD Rules (CRITICAL)
+
+### Always Verify CI After Push
+After EVERY push to remote, verify CI status:
+```bash
+source .venv/bin/activate
+python -m agentbible.cli.main ci status  # Check workflow runs
+# OR
+gh run list --limit 5   # Alternative
+```
+
+### If CI Fails
+1. Check what failed: `gh run view <run-id> --log-failed`
+2. Fix the issue locally
+3. Push fix and verify again
+4. NEVER tell the user "CI should pass" without checking
+
+## Key References
+
+- PROJECT_CONTEXT.md: Overview and related projects
+- SCOPE_OF_WORK.md: Phase definitions and success criteria
+- ARCHITECTURE.md: System design and data flow
+- IQM_GARNET_SPEC.md: Hardware parameters for simulation

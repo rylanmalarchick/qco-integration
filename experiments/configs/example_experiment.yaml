@@ -1,0 +1,47 @@
+# Example Experiment Configuration
+# ================================
+# This configuration demonstrates the BenchmarkRunner experiment setup
+# for comparing quantum circuit optimization strategies on IQM Garnet.
+#
+# Usage:
+#   from src.runner import BenchmarkRunner
+#   config = BenchmarkRunner.load_config("experiments/configs/example_experiment.yaml")
+#   results = runner.run(config)
+
+name: optimization_comparison
+description: >
+  Compare different optimization pass configurations on standard benchmark
+  circuits. Evaluates gate cancellation alone vs. combined cancellation 
+  and gate commutation strategies.
+
+# Optimization pass configurations to compare
+# Each configuration is a list of passes applied in sequence
+passes_configs:
+  - ["cancel"]                      # Gate cancellation only
+  - ["cancel", "commute"]           # Cancellation + commutation
+  - ["commute", "cancel"]           # Commutation first, then cancellation
+  - ["cancel", "commute", "cancel"] # Multiple passes
+
+# Target quantum hardware topology
+topology: iqm-garnet
+
+# IQM Garnet median noise parameters
+# Based on arXiv:2408.12433 benchmarks
+noise_params:
+  t1_ns: 37000.0           # Median T1 relaxation time
+  t2_ns: 9600.0            # Median T2 dephasing time  
+  single_qubit_error: 0.001   # ~0.1% single-qubit gate error
+  two_qubit_error: 0.006      # ~0.6% two-qubit gate error (CZ)
+
+# Whether to apply routing for hardware connectivity
+route: true
+
+# Parallel execution settings
+parallel: false           # Set to true for multi-threaded execution
+max_workers: 4            # Number of threads if parallel=true
+
+# Output configuration
+output_dir: results/raw
+
+# Random seed for reproducibility
+seed: 42

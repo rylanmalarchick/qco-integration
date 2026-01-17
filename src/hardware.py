@@ -102,7 +102,15 @@ class IQMHardwareExecutor:
         api_key: IQM API key (if using key-based auth).
         client_id: IQM client ID (if using OAuth).
         client_secret: IQM client secret (if using OAuth).
+        available_devices: List of available IQM devices for multi-device testing.
     """
+
+    # Supported IQM devices with their properties
+    SUPPORTED_DEVICES = {
+        "IQM_RESONANCE_5Q": {"qubits": 5, "2q_gates": ["CNOT", "CRZ"], "native": True},
+        "IQM_RESONANCE_20Q": {"qubits": 20, "2q_gates": ["CNOT", "CRZ"], "native": True},
+        "IQM_RESONANCE_DEMO": {"qubits": 5, "2q_gates": ["CNOT"], "native": False},
+    }
 
     def __init__(
         self,
@@ -168,6 +176,25 @@ class IQMHardwareExecutor:
             f"IQMHardwareExecutor initialized (dry_run={dry_run}, "
             f"auth_method={self.auth_method or 'none'})"
         )
+
+    def get_available_devices(self) -> list[str]:
+        """Get list of available IQM devices.
+
+        Returns:
+            List of device names.
+        """
+        return list(self.SUPPORTED_DEVICES.keys())
+
+    def get_device_info(self, device: str) -> dict[str, Any]:
+        """Get information about a specific device.
+
+        Args:
+            device: Device name.
+
+        Returns:
+            Device properties dictionary.
+        """
+        return self.SUPPORTED_DEVICES.get(device, {})
 
     def estimate_credits(self, circuits: list[HardwareCircuit], shots: int = 10000) -> dict:
         """Estimate total credits needed for circuit execution.
@@ -411,6 +438,72 @@ class IQMHardwareExecutor:
             counts = result["counts"]
 
         return counts
+
+    def execute_stress_test(
+        self,
+        circuits: list[HardwareCircuit],
+        shot_ranges: list[int] | None = None,
+        devices: list[str] | None = None,
+        backend: str = "IQM_RESONANCE_5Q",
+    ) -> dict[str, Any]:
+        """Execute circuits across multiple shot counts for stress testing.
+
+        Args:
+            circuits: Circuits to test.
+            shot_ranges: List of shot counts to test (default: [100, 1000, 10000]).
+            devices: Devices to test on (default: all available).
+            backend: Primary backend name.
+
+        Returns:
+            Stress test results dictionary.
+        """
+        if shot_ranges is None:
+            shot_ranges = [100, 1000, 10000]
+
+        if devices is None:
+            devices = [backend]
+
+        stress_test_results = {
+            "timestamp": __import__("datetime").datetime.now().isoformat(),
+            "circuits": len(circuits),
+            "shot_ranges": shot_ranges,
+            "devices": devices,
+            "results": [],
+        }
+
+        for shots in shot_ranges:
+            logger.info(f"\nTesting with {shots} shots per circuit...")
+            estimate = self.estimate_credits(circuits, shots=shots)
+
+            if estimate["within_free_tier"]:
+                logger.info(f"  ✓ Within free tier: {estimate['total_credits']} credits")
+
+                if not self.dry_run:
+                    try:
+                        results = self.execute(circuits, shots=shots, backend=backend)
+                        stress_test_results["results"].append({
+                            "shots": shots,
+                            "status": "completed",
+                            "num_results": len(results),
+                            "credits_used": estimate["total_credits"],
+                        })
+                    except Exception as e:
+                        logger.error(f"  ✗ Execution failed: {e}")
+                        stress_test_results["results"].append({
+                            "shots": shots,
+                            "status": "failed",
+                            "error": str(e),
+                        })
+            else:
+                logger.warning(f"  ✗ Exceeds free tier: {estimate['total_credits']} credits")
+                stress_test_results["results"].append({
+                    "shots": shots,
+                    "status": "skipped",
+                    "reason": "exceeds_free_tier",
+                    "estimated_credits": estimate["total_credits"],
+                })
+
+        return stress_test_results
 
 
 def load_hardware_circuits(results_dir: Path | str, num_circuits: int = 10) -> list[HardwareCircuit]:

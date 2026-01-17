@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-01-16T19:56:50.119346",
+  "num_circuits": 2,
+  "circuits": [
+    {
+      "name": "ghz_4q",
+      "hardware_fidelity": 0.51,
+      "simulated_fidelity": 0.85,
+      "difference": -0.34,
+      "shots": 100,
+      "execution_time_ms": -1
+    },
+    {
+      "name": "qft_4q",
+      "hardware_fidelity": 0.31,
+      "simulated_fidelity": 0.85,
+      "difference": -0.54,
+      "shots": 100,
+      "execution_time_ms": -1
+    }
+  ],
+  "summary": {
+    "mean_hardware_fidelity": 0.41,
+    "mean_simulated_fidelity": 0.85,
+    "mean_difference": -0.44,
+    "stdev_hardware": 0.1414,
+    "stdev_simulated": 0.0
+  }
+}

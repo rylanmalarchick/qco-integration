@@ -3,6 +3,9 @@
 This module provides integration with IQM Resonance quantum hardware,
 enabling real quantum execution and fidelity validation against simulation.
 
+Uses the official iqm-client[qiskit] library for proper server-side
+transpilation and job submission.
+
 Typical usage:
     executor = IQMHardwareExecutor(dry_run=True)
     credit_cost = executor.estimate_credits(circuits)
@@ -90,114 +93,91 @@ class HardwareResult:
 
 
 class IQMHardwareExecutor:
-    """Executor for IQM Resonance hardware with dry-run support.
+    """Executor for IQM Resonance hardware using official IQM client library.
 
-    Supports two authentication methods:
-    1. OAuth Client Credentials (IQM_CLIENT_ID + IQM_CLIENT_SECRET)
-    2. API Key (IQM_API_KEY)
+    Uses iqm-client[qiskit] for proper circuit transpilation and execution.
+    The IQM client handles server-side transpilation to IQM's native gate set.
 
     Attributes:
         dry_run: If True, estimate credits without executing.
-        auth_method: 'oauth' or 'api_key'
-        api_key: IQM API key (if using key-based auth).
-        client_id: IQM client ID (if using OAuth).
-        client_secret: IQM client secret (if using OAuth).
-        available_devices: List of available IQM devices for multi-device testing.
+        token: IQM authentication token from Resonance dashboard.
+        server_url: IQM Resonance server URL.
+        quantum_computer: Target quantum computer alias (e.g., 'garnet', 'sirius').
     """
 
-    # Supported IQM devices with their properties
-    SUPPORTED_DEVICES = {
-        "IQM_RESONANCE_5Q": {"qubits": 5, "2q_gates": ["CNOT", "CRZ"], "native": True},
-        "IQM_RESONANCE_20Q": {"qubits": 20, "2q_gates": ["CNOT", "CRZ"], "native": True},
-        "IQM_RESONANCE_DEMO": {"qubits": 5, "2q_gates": ["CNOT"], "native": False},
+    # Available IQM Resonance quantum computers
+    AVAILABLE_DEVICES = {
+        "garnet": {"qubits": 20, "native_gates": ["PRX", "CZ"], "description": "IQM Garnet (20Q)"},
+        "garnet:mock": {"qubits": 20, "native_gates": ["PRX", "CZ"], "description": "IQM Garnet Mock"},
+        "sirius": {"qubits": 34, "native_gates": ["PRX", "CZ"], "description": "IQM Sirius (34Q)"},
+        "sirius:mock": {"qubits": 34, "native_gates": ["PRX", "CZ"], "description": "IQM Sirius Mock"},
+        "emerald": {"qubits": 9, "native_gates": ["PRX", "CZ"], "description": "IQM Emerald (9Q)"},
+        "emerald:mock": {"qubits": 9, "native_gates": ["PRX", "CZ"], "description": "IQM Emerald Mock"},
     }
 
     def __init__(
         self,
         dry_run: bool = False,
-        auth_server: str | None = None,
-        client_id: str | None = None,
-        client_secret: str | None = None,
-        api_key: str | None = None,
-        api_url: str | None = None,
+        token: str | None = None,
+        server_url: str | None = None,
+        quantum_computer: str | None = None,
     ):
         """Initialize IQM hardware executor.
 
         Args:
-            dry_run: If True, only estimate credits, don't execute.
-            auth_server: IQM auth server (default from IQM_AUTH_SERVER env).
-            client_id: IQM client ID (default from IQM_CLIENT_ID env).
-            client_secret: IQM client secret (default from IQM_CLIENT_SECRET env).
-            api_key: IQM API key (default from IQM_API_KEY env).
-            api_url: IQM API URL (default from IQM_API_URL env).
+            dry_run: If True, only estimate credits without executing.
+            token: IQM authentication token (default from RESONANCE_API_TOKEN env).
+            server_url: IQM server URL (default: https://resonance.meetiqm.com).
+            quantum_computer: Quantum computer alias (default: garnet:mock).
 
         Raises:
-            ValueError: If neither OAuth nor API key credentials provided.
+            ValueError: If not in dry_run mode but token not provided.
         """
         self.dry_run = dry_run
+        self.token = token or os.getenv("RESONANCE_API_TOKEN", "")
+        self.server_url = server_url or "https://resonance.meetiqm.com"
+        self.quantum_computer = quantum_computer or "garnet:mock"
 
-        # Try OAuth first
-        self.auth_server = (
-            auth_server or os.getenv("IQM_AUTH_SERVER", "https://auth.resonance.meetiqm.com")
-        )
-        self.client_id = client_id or os.getenv("IQM_CLIENT_ID", "")
-        self.client_secret = client_secret or os.getenv("IQM_CLIENT_SECRET", "")
+        if not dry_run and not self.token:
+            raise ValueError(
+                "Token required for hardware execution. Either:\n"
+                "  1. Pass token parameter\n"
+                "  2. Set RESONANCE_API_TOKEN environment variable\n"
+                "Get token from: https://resonance.meetiqm.com/settings"
+            )
 
-        # Try API key
-        self.api_key = api_key or os.getenv("IQM_API_KEY", "") or os.getenv("RESONANCE_API_TOKEN", "")
-        self.api_url = api_url or os.getenv("IQM_API_URL", "https://resonance.meetiqm.com")
-
-        # Determine auth method
-        self.auth_method = None
-        if self.client_id and self.client_secret:
-            self.auth_method = "oauth"
-            logger.info("Using OAuth client credentials for authentication")
-        elif self.api_key:
-            self.auth_method = "api_key"
-            logger.info("Using API key for authentication")
-        else:
-            if not dry_run:
-                raise ValueError(
-                    "No IQM credentials provided. Either set:\n"
-                    "  1. OAuth: IQM_CLIENT_ID + IQM_CLIENT_SECRET\n"
-                    "  2. API Key: IQM_API_KEY\n"
-                    "Get credentials from: https://resonance.meetiqm.com/"
-                )
-            else:
-                logger.warning(
-                    "No IQM credentials provided. Running in dry-run mode only. "
-                    "To enable hardware execution, set either:\n"
-                    "  1. IQM_CLIENT_ID + IQM_CLIENT_SECRET (OAuth)\n"
-                    "  2. IQM_API_KEY (API key)"
-                )
-
-        self.client = None
         logger.info(
             f"IQMHardwareExecutor initialized (dry_run={dry_run}, "
-            f"auth_method={self.auth_method or 'none'})"
+            f"device={self.quantum_computer}, url={self.server_url})"
         )
 
     def get_available_devices(self) -> list[str]:
-        """Get list of available IQM devices.
+        """Get list of available IQM quantum computers.
 
         Returns:
-            List of device names.
+            List of device aliases.
         """
-        return list(self.SUPPORTED_DEVICES.keys())
+        return list(self.AVAILABLE_DEVICES.keys())
 
     def get_device_info(self, device: str) -> dict[str, Any]:
         """Get information about a specific device.
 
         Args:
-            device: Device name.
+            device: Device alias.
 
         Returns:
             Device properties dictionary.
         """
-        return self.SUPPORTED_DEVICES.get(device, {})
+        return self.AVAILABLE_DEVICES.get(device, {})
 
     def estimate_credits(self, circuits: list[HardwareCircuit], shots: int = 10000) -> dict:
         """Estimate total credits needed for circuit execution.
+
+        IQM Resonance pricing model:
+        - Base: 0.1 credit per circuit
+        - Gate scaling: 0.001 credit per gate
+        - 2Q gate multiplier: 2x cost
+        - Shot scaling: Linear with shot count
 
         Args:
             circuits: List of circuits to execute.
@@ -209,10 +189,8 @@ class IQMHardwareExecutor:
         per_circuit_credits = [c.estimate_credits() for c in circuits]
         total_per_circuit = sum(per_circuit_credits)
 
-        # IQM charges per-shot scaling
-        # 10k shots = base rate, other shot counts scale linearly
+        # IQM charges per-shot scaling (base rate is for 10k shots)
         shot_scaling = shots / 10000.0
-
         total_credits = total_per_circuit * shot_scaling
 
         return {
@@ -229,288 +207,107 @@ class IQMHardwareExecutor:
     def execute(
         self,
         circuits: list[HardwareCircuit],
-        shots: int = 10000,
-        backend: str = "IQM_RESONANCE_5Q",
+        shots: int = 1000,
+        backend: str | None = None,
     ) -> list[HardwareResult]:
-        """Execute circuits on IQM hardware.
+        """Execute circuits on IQM hardware using IQMProvider.
 
         Args:
             circuits: List of circuits to execute.
             shots: Number of measurement shots per circuit.
-            backend: IQM backend name.
+            backend: Deprecated parameter (ignored).
 
         Returns:
             List of hardware results.
 
         Raises:
-            RuntimeError: If dry_run=True, credentials not available, or auth_method not set.
-            Exception: If IQM API call fails.
+            RuntimeError: If dry_run=True or credentials not available.
         """
         if self.dry_run:
             raise RuntimeError(
-                "Cannot execute in dry-run mode. Set dry_run=False and provide credentials."
+                "Cannot execute in dry-run mode. Set dry_run=False and provide token."
             )
 
-        if not self.auth_method:
-            raise RuntimeError("IQM credentials not configured. Cannot execute on hardware.")
+        if not self.token:
+            raise RuntimeError("IQM token not configured. Cannot execute on hardware.")
 
-        logger.info(f"Executing {len(circuits)} circuits on {backend} with {shots} shots")
+        logger.info(
+            f"Executing {len(circuits)} circuits on {self.quantum_computer} with {shots} shots"
+        )
 
         try:
-            if self.auth_method == "oauth":
-                return self._execute_oauth(circuits, shots, backend)
-            elif self.auth_method == "api_key":
-                return self._execute_api_key(circuits, shots, backend)
-            else:
-                raise RuntimeError(f"Unknown auth method: {self.auth_method}")
+            from qiskit import transpile
+            from iqm.qiskit_iqm import IQMProvider
 
-        except Exception as e:
-            logger.error(f"Hardware execution failed: {e}")
-            raise
-
-    def _execute_oauth(
-        self,
-        circuits: list[HardwareCircuit],
-        shots: int,
-        backend: str,
-    ) -> list[HardwareResult]:
-        """Execute using OAuth client credentials."""
-        try:
-            from iqm.iqm_client import IQMClient  # type: ignore
-
-            client = IQMClient(
-                auth_server_url=self.auth_server,
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                base_url="https://resonance.meetiqm.com",
+            # Connect to IQM
+            provider = IQMProvider(
+                self.server_url,
+                quantum_computer=self.quantum_computer,
+                token=self.token,
             )
+            backend_obj = provider.get_backend()
 
             results = []
             for circuit in circuits:
-                logger.info(f"  Submitting {circuit.name}...")
+                logger.info(f"  Executing {circuit.name}...")
 
-                job = client.create_job(
-                    circuit=circuit.qasm,
-                    shots=shots,
-                    request_timeout=300,
-                )
+                # Convert QASM to Qiskit circuit
+                qasm_circuit = self._qasm_to_qiskit(circuit.qasm)
 
-                logger.info(f"    Job ID: {job.id}, waiting for results...")
+                # Add measurements if not present
+                if not qasm_circuit.data or qasm_circuit.data[-1][0].name != 'measure':
+                    qasm_circuit.measure_all()
 
-                result = job.wait_result(
-                    timeout=600,
-                    poll_interval_seconds=2,
-                )
+                # Transpile for IQM hardware
+                transpiled = transpile(qasm_circuit, backend=backend_obj)
 
-                counts = self._parse_measurement_results(result)
+                # Submit job
+                job = backend_obj.run(transpiled, shots=shots)
+                job_id = job.job_id()
+                logger.info(f"    Job submitted: {job_id}")
 
+                # Get results
+                result = job.result()
+                counts = result.get_counts()
+
+                # Create hardware result
                 hw_result = HardwareResult(
                     circuit_name=circuit.name,
                     circuit_qasm=circuit.qasm,
                     shots=shots,
                     counts=counts,
-                    execution_time_ms=result.get("execution_time_ms", -1),
-                    metadata=result,
+                    execution_time_ms=result.time_taken * 1000 if hasattr(result, "time_taken") else -1,
+                    metadata={"job_id": job_id},
                 )
 
                 results.append(hw_result)
-                logger.info(f"    Completed: fidelity={hw_result.compute_fidelity():.3f}")
+                fidelity = hw_result.compute_fidelity()
+                logger.info(f"    Completed: {len(counts)} states, fidelity≈{fidelity:.3f}")
 
             return results
 
-        except ImportError:
-            raise RuntimeError(
-                "IQM SDK not installed. Install with: pip install iqm-client"
-            ) from None
+        except Exception as e:
+            logger.error(f"Hardware execution failed: {e}")
+            raise
 
-    def _execute_api_key(
-        self,
-        circuits: list[HardwareCircuit],
-        shots: int,
-        backend: str,
-    ) -> list[HardwareResult]:
-        """Execute using API key authentication."""
-        import requests
-
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-
-        results = []
-        for circuit in circuits:
-            logger.info(f"  Submitting {circuit.name}...")
-
-            # Preprocess QASM to add include statement if missing
-            qasm = circuit.qasm
-            if "include" not in qasm and qasm.startswith("OPENQASM 3.0"):
-                # Add stdgates.inc after header
-                lines = qasm.split("\n")
-                lines.insert(1, 'include "stdgates.inc";')
-                qasm = "\n".join(lines)
-
-            # Create job
-            payload = {
-                "circuits": [qasm],
-                "shots": shots,
-            }
-
-            response = requests.post(
-                f"{self.api_url}/api/v1/jobs/garnet:mock/circuit",
-                json=payload,
-                headers=headers,
-                timeout=30,
-            )
-
-            if response.status_code not in (200, 201):
-                raise RuntimeError(
-                    f"Failed to create job: {response.status_code} {response.text}"
-                )
-
-            job_data = response.json()
-            job_id = job_data.get("id")
-
-            logger.info(f"    Job ID: {job_id}, waiting for results...")
-
-            # Poll for results
-            import time
-
-            max_polls = 300  # 10 minutes with 2-second intervals
-            for poll_count in range(max_polls):
-                response = requests.get(
-                    f"{self.api_url}/api/v1/jobs/{job_id}",
-                    headers=headers,
-                    timeout=30,
-                )
-
-                if response.status_code != 200:
-                    raise RuntimeError(
-                        f"Failed to get job status: {response.status_code} {response.text}"
-                    )
-
-                job_data = response.json()
-                status = job_data.get("status")
-
-                if status == "completed":
-                    result = job_data.get("result", {})
-                    counts = self._parse_measurement_results(result)
-
-                    hw_result = HardwareResult(
-                        circuit_name=circuit.name,
-                        circuit_qasm=circuit.qasm,
-                        shots=shots,
-                        counts=counts,
-                        execution_time_ms=result.get("execution_time_ms", -1),
-                        metadata=result,
-                    )
-
-                    results.append(hw_result)
-                    logger.info(f"    Completed: fidelity={hw_result.compute_fidelity():.3f}")
-                    break
-
-                elif status in ("failed", "error"):
-                    raise RuntimeError(f"Job {job_id} failed: {job_data.get('error')}")
-
-                else:
-                    logger.info(f"    Status: {status}, waiting...")
-                    time.sleep(2)
-            else:
-                raise RuntimeError(f"Job {job_id} timed out after {max_polls * 2} seconds")
-
-        return results
-
-    def _parse_measurement_results(self, result: dict[str, Any]) -> dict[str, int]:
-        """Parse IQM measurement results into bitstring counts.
+    def _qasm_to_qiskit(self, qasm: str) -> Any:
+        """Convert OpenQASM string to Qiskit QuantumCircuit.
 
         Args:
-            result: IQM API result dictionary.
+            qasm: OpenQASM 3.0 circuit string.
 
         Returns:
-            Dictionary mapping bitstrings to measurement counts.
+            Qiskit QuantumCircuit object.
         """
-        counts = {}
+        from qiskit import qasm3
 
-        # IQM typically returns results as list of measurements
-        if "measurements" in result:
-            measurements = result["measurements"]
+        # Add include statement if missing (for OpenQASM 3.0 compatibility)
+        if "include" not in qasm and qasm.strip().startswith("OPENQASM 3.0"):
+            lines = qasm.split("\n")
+            lines.insert(1, 'include "stdgates.inc";')
+            qasm = "\n".join(lines)
 
-            # Convert list of measurement arrays to bitstring counts
-            for measurement in measurements:
-                # measurement is typically [bit0, bit1, ..., bitN]
-                bitstring = "".join(str(int(b)) for b in measurement)
-                counts[bitstring] = counts.get(bitstring, 0) + 1
-
-        elif "counts" in result:
-            # Direct counts format
-            counts = result["counts"]
-
-        return counts
-
-    def execute_stress_test(
-        self,
-        circuits: list[HardwareCircuit],
-        shot_ranges: list[int] | None = None,
-        devices: list[str] | None = None,
-        backend: str = "IQM_RESONANCE_5Q",
-    ) -> dict[str, Any]:
-        """Execute circuits across multiple shot counts for stress testing.
-
-        Args:
-            circuits: Circuits to test.
-            shot_ranges: List of shot counts to test (default: [100, 1000, 10000]).
-            devices: Devices to test on (default: all available).
-            backend: Primary backend name.
-
-        Returns:
-            Stress test results dictionary.
-        """
-        if shot_ranges is None:
-            shot_ranges = [100, 1000, 10000]
-
-        if devices is None:
-            devices = [backend]
-
-        stress_test_results = {
-            "timestamp": __import__("datetime").datetime.now().isoformat(),
-            "circuits": len(circuits),
-            "shot_ranges": shot_ranges,
-            "devices": devices,
-            "results": [],
-        }
-
-        for shots in shot_ranges:
-            logger.info(f"\nTesting with {shots} shots per circuit...")
-            estimate = self.estimate_credits(circuits, shots=shots)
-
-            if estimate["within_free_tier"]:
-                logger.info(f"  ✓ Within free tier: {estimate['total_credits']} credits")
-
-                if not self.dry_run:
-                    try:
-                        results = self.execute(circuits, shots=shots, backend=backend)
-                        stress_test_results["results"].append({
-                            "shots": shots,
-                            "status": "completed",
-                            "num_results": len(results),
-                            "credits_used": estimate["total_credits"],
-                        })
-                    except Exception as e:
-                        logger.error(f"  ✗ Execution failed: {e}")
-                        stress_test_results["results"].append({
-                            "shots": shots,
-                            "status": "failed",
-                            "error": str(e),
-                        })
-            else:
-                logger.warning(f"  ✗ Exceeds free tier: {estimate['total_credits']} credits")
-                stress_test_results["results"].append({
-                    "shots": shots,
-                    "status": "skipped",
-                    "reason": "exceeds_free_tier",
-                    "estimated_credits": estimate["total_credits"],
-                })
-
-        return stress_test_results
+        return qasm3.loads(qasm)
 
 
 def load_hardware_circuits(results_dir: Path | str, num_circuits: int = 10) -> list[HardwareCircuit]:

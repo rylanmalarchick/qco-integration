@@ -48,24 +48,42 @@ Go to: https://resonance.meetiqm.com/signup
 
 ### Step 3: Get Your Credentials
 
-After signup, retrieve from account:
-- **Client ID**
-- **Client Secret**
+After signup, you'll have ONE of these credential types:
+
+**Option A: OAuth Client Credentials** (original signup method)
+- Retrieve from account settings → "API Access"
+- You'll get:
+  - **Client ID**
+  - **Client Secret**
+
+**Option B: API Key** (alternative signup method)
+- Retrieve from account settings → "API Keys"
+- You'll get:
+  - **Single API Key** (looks like `iqm_...` or `sk_...`)
 
 ### Step 4: Set Environment Variables
 
+**If using OAuth:**
 ```bash
 export IQM_CLIENT_ID='your-client-id'
 export IQM_CLIENT_SECRET='your-client-secret'
+```
 
-# Verify it's set
-echo $IQM_CLIENT_ID
+**If using API Key:**
+```bash
+export IQM_API_KEY='your-api-key'
+export IQM_API_URL='https://api.resonance.meetiqm.com'  # or your endpoint
 ```
 
 Or add to `.env` file:
 ```
+# Option A: OAuth
 IQM_CLIENT_ID=your-client-id
 IQM_CLIENT_SECRET=your-client-secret
+
+# Option B: API Key
+IQM_API_KEY=your-api-key
+IQM_API_URL=https://api.resonance.meetiqm.com
 ```
 
 ### Step 5: Run Hardware Validation

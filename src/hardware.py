@@ -92,11 +92,16 @@ class HardwareResult:
 class IQMHardwareExecutor:
     """Executor for IQM Resonance hardware with dry-run support.
 
+    Supports two authentication methods:
+    1. OAuth Client Credentials (IQM_CLIENT_ID + IQM_CLIENT_SECRET)
+    2. API Key (IQM_API_KEY)
+
     Attributes:
         dry_run: If True, estimate credits without executing.
-        auth_server: IQM authentication server URL.
-        client_id: IQM client ID (from environment).
-        client_secret: IQM client secret (from environment).
+        auth_method: 'oauth' or 'api_key'
+        api_key: IQM API key (if using key-based auth).
+        client_id: IQM client ID (if using OAuth).
+        client_secret: IQM client secret (if using OAuth).
     """
 
     def __init__(
@@ -105,6 +110,8 @@ class IQMHardwareExecutor:
         auth_server: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
+        api_key: str | None = None,
+        api_url: str | None = None,
     ):
         """Initialize IQM hardware executor.
 
@@ -113,36 +120,53 @@ class IQMHardwareExecutor:
             auth_server: IQM auth server (default from IQM_AUTH_SERVER env).
             client_id: IQM client ID (default from IQM_CLIENT_ID env).
             client_secret: IQM client secret (default from IQM_CLIENT_SECRET env).
+            api_key: IQM API key (default from IQM_API_KEY env).
+            api_url: IQM API URL (default from IQM_API_URL env).
 
         Raises:
-            ValueError: If credentials not provided and not in environment.
+            ValueError: If neither OAuth nor API key credentials provided.
         """
         self.dry_run = dry_run
 
-        # Get credentials from env or arguments
+        # Try OAuth first
         self.auth_server = (
             auth_server or os.getenv("IQM_AUTH_SERVER", "https://auth.resonance.meetiqm.com")
         )
         self.client_id = client_id or os.getenv("IQM_CLIENT_ID", "")
         self.client_secret = client_secret or os.getenv("IQM_CLIENT_SECRET", "")
 
-        # Check if credentials are provided (warn if not in dry-run)
-        if not self.client_id or not self.client_secret:
-            if dry_run:
-                logger.warning(
-                    "IQM credentials not provided. Running in dry-run mode only. "
-                    "To enable hardware execution, set IQM_CLIENT_ID and IQM_CLIENT_SECRET."
+        # Try API key
+        self.api_key = api_key or os.getenv("IQM_API_KEY", "")
+        self.api_url = api_url or os.getenv("IQM_API_URL", "https://api.resonance.meetiqm.com")
+
+        # Determine auth method
+        self.auth_method = None
+        if self.client_id and self.client_secret:
+            self.auth_method = "oauth"
+            logger.info("Using OAuth client credentials for authentication")
+        elif self.api_key:
+            self.auth_method = "api_key"
+            logger.info("Using API key for authentication")
+        else:
+            if not dry_run:
+                raise ValueError(
+                    "No IQM credentials provided. Either set:\n"
+                    "  1. OAuth: IQM_CLIENT_ID + IQM_CLIENT_SECRET\n"
+                    "  2. API Key: IQM_API_KEY\n"
+                    "Get credentials from: https://resonance.meetiqm.com/"
                 )
             else:
-                raise ValueError(
-                    "IQM credentials required for hardware execution. "
-                    "Set IQM_CLIENT_ID and IQM_CLIENT_SECRET environment variables."
+                logger.warning(
+                    "No IQM credentials provided. Running in dry-run mode only. "
+                    "To enable hardware execution, set either:\n"
+                    "  1. IQM_CLIENT_ID + IQM_CLIENT_SECRET (OAuth)\n"
+                    "  2. IQM_API_KEY (API key)"
                 )
 
         self.client = None
         logger.info(
             f"IQMHardwareExecutor initialized (dry_run={dry_run}, "
-            f"credentials={'set' if self.client_id else 'not set'})"
+            f"auth_method={self.auth_method or 'none'})"
         )
 
     def estimate_credits(self, circuits: list[HardwareCircuit], shots: int = 10000) -> dict:
@@ -192,7 +216,7 @@ class IQMHardwareExecutor:
             List of hardware results.
 
         Raises:
-            RuntimeError: If dry_run=True or credentials not available.
+            RuntimeError: If dry_run=True, credentials not available, or auth_method not set.
             Exception: If IQM API call fails.
         """
         if self.dry_run:
@@ -200,13 +224,31 @@ class IQMHardwareExecutor:
                 "Cannot execute in dry-run mode. Set dry_run=False and provide credentials."
             )
 
-        if not self.client_id or not self.client_secret:
+        if not self.auth_method:
             raise RuntimeError("IQM credentials not configured. Cannot execute on hardware.")
 
         logger.info(f"Executing {len(circuits)} circuits on {backend} with {shots} shots")
 
         try:
-            # Import IQM SDK (lazy import to avoid hard dependency)
+            if self.auth_method == "oauth":
+                return self._execute_oauth(circuits, shots, backend)
+            elif self.auth_method == "api_key":
+                return self._execute_api_key(circuits, shots, backend)
+            else:
+                raise RuntimeError(f"Unknown auth method: {self.auth_method}")
+
+        except Exception as e:
+            logger.error(f"Hardware execution failed: {e}")
+            raise
+
+    def _execute_oauth(
+        self,
+        circuits: list[HardwareCircuit],
+        shots: int,
+        backend: str,
+    ) -> list[HardwareResult]:
+        """Execute using OAuth client credentials."""
+        try:
             from iqm.iqm_client import IQMClient  # type: ignore
 
             client = IQMClient(
@@ -220,22 +262,19 @@ class IQMHardwareExecutor:
             for circuit in circuits:
                 logger.info(f"  Submitting {circuit.name}...")
 
-                # Execute on hardware
                 job = client.create_job(
                     circuit=circuit.qasm,
                     shots=shots,
-                    request_timeout=300,  # 5 min timeout
+                    request_timeout=300,
                 )
 
                 logger.info(f"    Job ID: {job.id}, waiting for results...")
 
-                # Wait for execution
                 result = job.wait_result(
-                    timeout=600,  # 10 min total timeout
+                    timeout=600,
                     poll_interval_seconds=2,
                 )
 
-                # Parse measurement results
                 counts = self._parse_measurement_results(result)
 
                 hw_result = HardwareResult(
@@ -256,9 +295,95 @@ class IQMHardwareExecutor:
             raise RuntimeError(
                 "IQM SDK not installed. Install with: pip install iqm-client"
             ) from None
-        except Exception as e:
-            logger.error(f"Hardware execution failed: {e}")
-            raise
+
+    def _execute_api_key(
+        self,
+        circuits: list[HardwareCircuit],
+        shots: int,
+        backend: str,
+    ) -> list[HardwareResult]:
+        """Execute using API key authentication."""
+        import requests
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        results = []
+        for circuit in circuits:
+            logger.info(f"  Submitting {circuit.name}...")
+
+            # Create job
+            payload = {
+                "circuit": circuit.qasm,
+                "shots": shots,
+                "backend": backend,
+            }
+
+            response = requests.post(
+                f"{self.api_url}/jobs",
+                json=payload,
+                headers=headers,
+                timeout=30,
+            )
+
+            if response.status_code not in (200, 201):
+                raise RuntimeError(
+                    f"Failed to create job: {response.status_code} {response.text}"
+                )
+
+            job_data = response.json()
+            job_id = job_data.get("id")
+
+            logger.info(f"    Job ID: {job_id}, waiting for results...")
+
+            # Poll for results
+            import time
+
+            max_polls = 300  # 10 minutes with 2-second intervals
+            for poll_count in range(max_polls):
+                response = requests.get(
+                    f"{self.api_url}/jobs/{job_id}",
+                    headers=headers,
+                    timeout=30,
+                )
+
+                if response.status_code != 200:
+                    raise RuntimeError(
+                        f"Failed to get job status: {response.status_code} {response.text}"
+                    )
+
+                job_data = response.json()
+                status = job_data.get("status")
+
+                if status == "completed":
+                    result = job_data.get("result", {})
+                    counts = self._parse_measurement_results(result)
+
+                    hw_result = HardwareResult(
+                        circuit_name=circuit.name,
+                        circuit_qasm=circuit.qasm,
+                        shots=shots,
+                        counts=counts,
+                        execution_time_ms=result.get("execution_time_ms", -1),
+                        metadata=result,
+                    )
+
+                    results.append(hw_result)
+                    logger.info(f"    Completed: fidelity={hw_result.compute_fidelity():.3f}")
+                    break
+
+                elif status in ("failed", "error"):
+                    raise RuntimeError(f"Job {job_id} failed: {job_data.get('error')}")
+
+                else:
+                    logger.info(f"    Status: {status}, waiting...")
+                    time.sleep(2)
+            else:
+                raise RuntimeError(f"Job {job_id} timed out after {max_polls * 2} seconds")
+
+        return results
 
     def _parse_measurement_results(self, result: dict[str, Any]) -> dict[str, int]:
         """Parse IQM measurement results into bitstring counts.

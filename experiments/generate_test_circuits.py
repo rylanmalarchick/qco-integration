@@ -28,7 +28,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.corpus import create_standard_corpus, CircuitSpec, CircuitType
 from src.hardware import HardwareCircuit
-from src.qasm import parse_qasm_to_metrics
+from src.qasm import extract_metrics
 
 # Configure logging
 logging.basicConfig(
@@ -93,14 +93,14 @@ class TestCircuitGenerator:
                 circuit = sorted_circuits[i]
 
                 # Parse QASM to get metrics
-                metrics = parse_qasm_to_metrics(circuit.qasm)
+                metrics = extract_metrics(circuit.qasm)
 
                 hw_circuit = HardwareCircuit(
                     name=circuit.spec.name,
                     qasm=circuit.qasm,
-                    gates=metrics.get("total_gates", 10),
-                    depth=metrics.get("depth", 5),
-                    two_qubit_gates=metrics.get("two_qubit_gates", 2),
+                    gates=metrics.gates,
+                    depth=metrics.depth,
+                    two_qubit_gates=metrics.two_qubit_gates,
                 )
 
                 circuits.append(hw_circuit)
@@ -155,14 +155,14 @@ class TestCircuitGenerator:
                 if len(circuits) >= max_depth * num_per_depth:
                     break
 
-                metrics = parse_qasm_to_metrics(circuit.qasm)
+                metrics = extract_metrics(circuit.qasm)
 
                 hw_circuit = HardwareCircuit(
                     name=f"{circuit.spec.name}_d{target_depth}",
                     qasm=circuit.qasm,
-                    gates=metrics.get("total_gates", 10),
-                    depth=metrics.get("depth", 5),
-                    two_qubit_gates=metrics.get("two_qubit_gates", 2),
+                    gates=metrics.gates,
+                    depth=metrics.depth,
+                    two_qubit_gates=metrics.two_qubit_gates,
                 )
 
                 circuits.append(hw_circuit)
@@ -187,8 +187,8 @@ class TestCircuitGenerator:
         all_circuits = list(self.corpus._circuits)
 
         # Create complexity bins
-        min_gates = min((parse_qasm_to_metrics(c.qasm).get("total_gates", 0)) for c in all_circuits)
-        max_gates = max((parse_qasm_to_metrics(c.qasm).get("total_gates", 0)) for c in all_circuits)
+        min_gates = min((extract_metrics(c.qasm).get("total_gates", 0)) for c in all_circuits)
+        max_gates = max((extract_metrics(c.qasm).get("total_gates", 0)) for c in all_circuits)
 
         num_bins = min(10, max_circuits // 2)
         bin_size = (max_gates - min_gates) / num_bins
@@ -200,20 +200,20 @@ class TestCircuitGenerator:
             bin_circuits = [
                 c
                 for c in all_circuits
-                if bin_start <= parse_qasm_to_metrics(c.qasm).get("total_gates", 0) < bin_end
+                if bin_start <= extract_metrics(c.qasm).get("total_gates", 0) < bin_end
             ]
 
             if bin_circuits:
                 # Pick one from each bin for even coverage
                 circuit = bin_circuits[0]
-                metrics = parse_qasm_to_metrics(circuit.qasm)
+                metrics = extract_metrics(circuit.qasm)
 
                 hw_circuit = HardwareCircuit(
                     name=circuit.spec.name,
                     qasm=circuit.qasm,
-                    gates=metrics.get("total_gates", 10),
-                    depth=metrics.get("depth", 5),
-                    two_qubit_gates=metrics.get("two_qubit_gates", 2),
+                    gates=metrics.gates,
+                    depth=metrics.depth,
+                    two_qubit_gates=metrics.two_qubit_gates,
                 )
 
                 circuits.append(hw_circuit)

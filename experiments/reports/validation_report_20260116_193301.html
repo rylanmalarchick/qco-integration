@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Validation Report</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .metric-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .metric-unit {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background-color: #ecf0f1;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .warning {
+            color: #e74c3c;
+        }
+        .info {
+            color: #3498db;
+        }
+        .generated {
+            color: #95a5a6;
+            font-size: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Hardware Validation Report</h1>
+        
+        <h2>📊 Overall Statistics</h2>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <h3>Total Circuits</h3>
+                <div class="metric-value">12</div>
+            </div>
+            <div class="metric-card">
+                <h3>Hardware Fidelity</h3>
+                <div class="metric-value success">0.634</div>
+                <div class="metric-unit">mean ± 0.088</div>
+            </div>
+            <div class="metric-card">
+                <h3>Simulated Fidelity</h3>
+                <div class="metric-value info">0.589</div>
+                <div class="metric-unit">mean ± 0.090</div>
+            </div>
+            <div class="metric-card">
+                <h3>Fidelity Gap</h3>
+                <div class="metric-value">0.046</div>
+                <div class="metric-unit">mean difference</div>
+            </div>
+        </div>
+
+        <h2>⏱️ Performance Metrics</h2>
+        <div class="metric-grid">
+            <div class="metric-card">
+                <h3>Avg Execution Time</h3>
+                <div class="metric-value">148.9</div>
+                <div class="metric-unit">milliseconds</div>
+            </div>
+            <div class="metric-card">
+                <h3>Max Execution Time</h3>
+                <div class="metric-value">174.3</div>
+                <div class="metric-unit">milliseconds</div>
+            </div>
+        </div>
+
+        <h2>📈 Fidelity Distribution</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Mean</th>
+                <th>Median</th>
+                <th>Stdev</th>
+                <th>Min</th>
+                <th>Max</th>
+            </tr>
+            <tr>
+                <td><strong>Hardware Fidelity</strong></td>
+                <td>0.6343</td>
+                <td>0.6320</td>
+                <td>0.0879</td>
+                <td>0.4890</td>
+                <td>0.7560</td>
+            </tr>
+            <tr>
+                <td><strong>Simulated Fidelity</strong></td>
+                <td>0.5885</td>
+                <td>0.5890</td>
+                <td>0.0902</td>
+                <td>0.4420</td>
+                <td>0.7180</td>
+            </tr>
+        </table>
+
+        <h2>🎯 Per-Circuit Results</h2>
+        <table>
+            <tr>
+                <th>Circuit Name</th>
+                <th>Runs</th>
+                <th>Hw Fidelity</th>
+                <th>Sim Fidelity</th>
+                <th>Gap</th>
+                <th>Avg Time (ms)</th>
+            </tr>
+            <tr>
+                <td><code>ghz_4q</code></td>
+                <td>1</td>
+                <td>0.7560</td>
+                <td>0.7180</td>
+                <td>0.0380</td>
+                <td>125.3</td>
+            </tr>
+            <tr>
+                <td><code>ghz_8q</code></td>
+                <td>1</td>
+                <td>0.7420</td>
+                <td>0.6980</td>
+                <td>0.0440</td>
+                <td>128.7</td>
+            </tr>
+            <tr>
+                <td><code>ghz_12q</code></td>
+                <td>1</td>
+                <td>0.7180</td>
+                <td>0.6720</td>
+                <td>0.0460</td>
+                <td>135.2</td>
+            </tr>
+            <tr>
+                <td><code>qft_4q</code></td>
+                <td>1</td>
+                <td>0.6230</td>
+                <td>0.5840</td>
+                <td>0.0390</td>
+                <td>145.8</td>
+            </tr>
+            <tr>
+                <td><code>qft_8q</code></td>
+                <td>1</td>
+                <td>0.5420</td>
+                <td>0.4980</td>
+                <td>0.0440</td>
+                <td>156.3</td>
+            </tr>
+            <tr>
+                <td><code>qft_12q</code></td>
+                <td>1</td>
+                <td>0.4890</td>
+                <td>0.4420</td>
+                <td>0.0470</td>
+                <td>162.1</td>
+            </tr>
+            <tr>
+                <td><code>qaoa_4q_p1_g0.50_b0.50</code></td>
+                <td>1</td>
+                <td>0.6870</td>
+                <td>0.6410</td>
+                <td>0.0460</td>
+                <td>138.5</td>
+            </tr>
+            <tr>
+                <td><code>qaoa_8q_p1_g0.50_b0.50</code></td>
+                <td>1</td>
+                <td>0.6120</td>
+                <td>0.5630</td>
+                <td>0.0490</td>
+                <td>151.7</td>
+            </tr>
+            <tr>
+                <td><code>qaoa_12q_p1_g0.50_b0.50</code></td>
+                <td>1</td>
+                <td>0.5310</td>
+                <td>0.4780</td>
+                <td>0.0530</td>
+                <td>168.2</td>
+            </tr>
+            <tr>
+                <td><code>random_4q_d5_density0.3</code></td>
+                <td>1</td>
+                <td>0.6980</td>
+                <td>0.6520</td>
+                <td>0.0460</td>
+                <td>142.1</td>
+            </tr>
+            <tr>
+                <td><code>random_4q_d10_density0.3</code></td>
+                <td>1</td>
+                <td>0.6410</td>
+                <td>0.5940</td>
+                <td>0.0470</td>
+                <td>158.6</td>
+            </tr>
+            <tr>
+                <td><code>random_4q_d20_density0.3</code></td>
+                <td>1</td>
+                <td>0.5730</td>
+                <td>0.5220</td>
+                <td>0.0510</td>
+                <td>174.3</td>
+            </tr>
+        </table>
+
+        <div class="generated">
+            <p>Report generated at: <strong>2026-01-16T19:33:01.732311</strong></p>
+        </div>
+    </div>
+</body>
+</html>

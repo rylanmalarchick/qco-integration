@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-01-16T19:33:01.732311",
+  "num_experiments": 1,
+  "total_circuits": 12,
+  "hardware_fidelity": {
+    "mean": 0.6343333333333333,
+    "median": 0.632,
+    "stdev": 0.08789490970195686,
+    "min": 0.489,
+    "max": 0.756
+  },
+  "simulated_fidelity": {
+    "mean": 0.5885,
+    "median": 0.589,
+    "stdev": 0.09020532135079393,
+    "min": 0.442,
+    "max": 0.718
+  },
+  "fidelity_difference": {
+    "mean": 0.045833333333333344,
+    "median": 0.045999999999999985,
+    "stdev": 0.004323999271157386,
+    "min": 0.038000000000000034,
+    "max": 0.05300000000000005
+  },
+  "timing": {
+    "mean_ms": 148.9,
+    "max_ms": 174.3,
+    "min_ms": 125.3
+  },
+  "per_circuit": {
+    "ghz_4q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.756,
+      "simulated_fidelity_mean": 0.718,
+      "fidelity_difference_mean": 0.038000000000000034,
+      "avg_execution_time_ms": 125.3
+    },
+    "ghz_8q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.742,
+      "simulated_fidelity_mean": 0.698,
+      "fidelity_difference_mean": 0.04400000000000004,
+      "avg_execution_time_ms": 128.7
+    },
+    "ghz_12q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.718,
+      "simulated_fidelity_mean": 0.672,
+      "fidelity_difference_mean": 0.04599999999999993,
+      "avg_execution_time_ms": 135.2
+    },
+    "qft_4q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.623,
+      "simulated_fidelity_mean": 0.584,
+      "fidelity_difference_mean": 0.039000000000000035,
+      "avg_execution_time_ms": 145.8
+    },
+    "qft_8q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.542,
+      "simulated_fidelity_mean": 0.498,
+      "fidelity_difference_mean": 0.04400000000000004,
+      "avg_execution_time_ms": 156.3
+    },
+    "qft_12q": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.489,
+      "simulated_fidelity_mean": 0.442,
+      "fidelity_difference_mean": 0.046999999999999986,
+      "avg_execution_time_ms": 162.1
+    },
+    "qaoa_4q_p1_g0.50_b0.50": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.687,
+      "simulated_fidelity_mean": 0.641,
+      "fidelity_difference_mean": 0.04600000000000004,
+      "avg_execution_time_ms": 138.5
+    },
+    "qaoa_8q_p1_g0.50_b0.50": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.612,
+      "simulated_fidelity_mean": 0.563,
+      "fidelity_difference_mean": 0.049000000000000044,
+      "avg_execution_time_ms": 151.7
+    },
+    "qaoa_12q_p1_g0.50_b0.50": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.531,
+      "simulated_fidelity_mean": 0.478,
+      "fidelity_difference_mean": 0.05300000000000005,
+      "avg_execution_time_ms": 168.2
+    },
+    "random_4q_d5_density0.3": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.698,
+      "simulated_fidelity_mean": 0.652,
+      "fidelity_difference_mean": 0.04599999999999993,
+      "avg_execution_time_ms": 142.1
+    },
+    "random_4q_d10_density0.3": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.641,
+      "simulated_fidelity_mean": 0.594,
+      "fidelity_difference_mean": 0.04700000000000004,
+      "avg_execution_time_ms": 158.6
+    },
+    "random_4q_d20_density0.3": {
+      "count": 1,
+      "hardware_fidelity_mean": 0.573,
+      "simulated_fidelity_mean": 0.522,
+      "fidelity_difference_mean": 0.050999999999999934,
+      "avg_execution_time_ms": 174.3
+    }
+  }
+}

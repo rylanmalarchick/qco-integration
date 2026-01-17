@@ -21,9 +21,20 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
+
+# Load .env file
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    with env_path.open() as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                os.environ[key] = value
 
 # Add src to path
 PROJECT_ROOT = Path(__file__).parent.parent

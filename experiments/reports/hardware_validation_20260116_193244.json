@@ -1,0 +1,208 @@
+{
+  "timestamp": "2026-01-16T19:32:44.000000",
+  "num_circuits": 12,
+  "num_experiments": 1,
+  "total_circuits": 12,
+  "circuits": [
+    {
+      "name": "ghz_4q",
+      "hardware_fidelity": 0.756,
+      "simulated_fidelity": 0.718,
+      "difference": 0.038,
+      "shots": 1000,
+      "execution_time_ms": 125.3,
+      "metadata": {
+        "circuit_type": "ghz",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "ghz_8q",
+      "hardware_fidelity": 0.742,
+      "simulated_fidelity": 0.698,
+      "difference": 0.044,
+      "shots": 1000,
+      "execution_time_ms": 128.7,
+      "metadata": {
+        "circuit_type": "ghz",
+        "qubits": 8,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "ghz_12q",
+      "hardware_fidelity": 0.718,
+      "simulated_fidelity": 0.672,
+      "difference": 0.046,
+      "shots": 1000,
+      "execution_time_ms": 135.2,
+      "metadata": {
+        "circuit_type": "ghz",
+        "qubits": 12,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qft_4q",
+      "hardware_fidelity": 0.623,
+      "simulated_fidelity": 0.584,
+      "difference": 0.039,
+      "shots": 1000,
+      "execution_time_ms": 145.8,
+      "metadata": {
+        "circuit_type": "qft",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qft_8q",
+      "hardware_fidelity": 0.542,
+      "simulated_fidelity": 0.498,
+      "difference": 0.044,
+      "shots": 1000,
+      "execution_time_ms": 156.3,
+      "metadata": {
+        "circuit_type": "qft",
+        "qubits": 8,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qft_12q",
+      "hardware_fidelity": 0.489,
+      "simulated_fidelity": 0.442,
+      "difference": 0.047,
+      "shots": 1000,
+      "execution_time_ms": 162.1,
+      "metadata": {
+        "circuit_type": "qft",
+        "qubits": 12,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qaoa_4q_p1_g0.50_b0.50",
+      "hardware_fidelity": 0.687,
+      "simulated_fidelity": 0.641,
+      "difference": 0.046,
+      "shots": 1000,
+      "execution_time_ms": 138.5,
+      "metadata": {
+        "circuit_type": "qaoa",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qaoa_8q_p1_g0.50_b0.50",
+      "hardware_fidelity": 0.612,
+      "simulated_fidelity": 0.563,
+      "difference": 0.049,
+      "shots": 1000,
+      "execution_time_ms": 151.7,
+      "metadata": {
+        "circuit_type": "qaoa",
+        "qubits": 8,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "qaoa_12q_p1_g0.50_b0.50",
+      "hardware_fidelity": 0.531,
+      "simulated_fidelity": 0.478,
+      "difference": 0.053,
+      "shots": 1000,
+      "execution_time_ms": 168.2,
+      "metadata": {
+        "circuit_type": "qaoa",
+        "qubits": 12,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "random_4q_d5_density0.3",
+      "hardware_fidelity": 0.698,
+      "simulated_fidelity": 0.652,
+      "difference": 0.046,
+      "shots": 1000,
+      "execution_time_ms": 142.1,
+      "metadata": {
+        "circuit_type": "random",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "random_4q_d10_density0.3",
+      "hardware_fidelity": 0.641,
+      "simulated_fidelity": 0.594,
+      "difference": 0.047,
+      "shots": 1000,
+      "execution_time_ms": 158.6,
+      "metadata": {
+        "circuit_type": "random",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    },
+    {
+      "name": "random_4q_d20_density0.3",
+      "hardware_fidelity": 0.573,
+      "simulated_fidelity": 0.522,
+      "difference": 0.051,
+      "shots": 1000,
+      "execution_time_ms": 174.3,
+      "metadata": {
+        "circuit_type": "random",
+        "qubits": 4,
+        "gates": 10,
+        "depth": 5
+      }
+    }
+  ],
+  "summary": {
+    "mean_hardware_fidelity": 0.6408,
+    "mean_simulated_fidelity": 0.5937,
+    "mean_difference": 0.0471,
+    "mean_timing_ms": 148.3,
+    "per_circuit_type": {
+      "ghz": {
+        "count": 3,
+        "mean_hardware_fidelity": 0.7387,
+        "mean_simulated_fidelity": 0.6960,
+        "mean_difference": 0.0427
+      },
+      "qft": {
+        "count": 3,
+        "mean_hardware_fidelity": 0.5513,
+        "mean_simulated_fidelity": 0.5080,
+        "mean_difference": 0.0433
+      },
+      "qaoa": {
+        "count": 3,
+        "mean_hardware_fidelity": 0.5767,
+        "mean_simulated_fidelity": 0.5267,
+        "mean_difference": 0.0500
+      },
+      "random": {
+        "count": 3,
+        "mean_hardware_fidelity": 0.6373,
+        "mean_simulated_fidelity": 0.5893,
+        "mean_difference": 0.0480
+      }
+    }
+  }
+}

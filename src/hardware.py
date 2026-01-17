@@ -249,7 +249,8 @@ class IQMHardwareExecutor:
 
             results = []
             for circuit in circuits:
-                logger.info(f"  Executing {circuit.name}...")
+                circuit_name = circuit.spec.name if hasattr(circuit, 'spec') else circuit.name
+                logger.info(f"  Executing {circuit_name}...")
 
                 # Convert QASM to Qiskit circuit
                 qasm_circuit = self._qasm_to_qiskit(circuit.qasm)

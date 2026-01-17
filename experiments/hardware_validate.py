@@ -87,6 +87,12 @@ def main() -> None:
         default="IQM_RESONANCE_5Q",
         help="IQM backend name (default: IQM_RESONANCE_5Q)",
     )
+    parser.add_argument(
+        "--quantum-computer",
+        type=str,
+        default="garnet:mock",
+        help="Quantum computer alias (default: garnet:mock, use 'garnet' for real hardware)",
+    )
     args = parser.parse_args()
 
     logger.info("=" * 70)
@@ -94,8 +100,8 @@ def main() -> None:
     logger.info("=" * 70)
     logger.info("")
 
-    # Create executor
-    executor = IQMHardwareExecutor(dry_run=args.dry_run)
+    # Create executor with specified quantum computer
+    executor = IQMHardwareExecutor(dry_run=args.dry_run, quantum_computer=args.quantum_computer)
 
     # Load circuit corpus
     logger.info("Loading circuit corpus...")

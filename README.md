@@ -8,7 +8,7 @@ This project provides an orchestration layer for analyzing fidelity degradation 
 
 ## Project Status
 
-**Phase 5: Complete** ✓ - End-to-end framework operational with real components and hardware validation support
+**Phase 5: Complete** - End-to-end framework operational with real components and hardware validation support
 
 ### Completed Phases
 
@@ -94,7 +94,7 @@ python experiments/hardware_dryrun.py --num-circuits 10
 
 # Output:
 # Estimated total cost:  0.9 credits
-# Within free tier:      ✓ YES
+# Within free tier:      YES
 
 # 2. Sign up for free tier: https://resonance.meetiqm.com/signup
 

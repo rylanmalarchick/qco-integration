@@ -73,7 +73,7 @@
 %==============================================================================
 
 \begin{abstract}
-We present a comprehensive analysis of quantum circuit fidelity across the full compilation stack, from high-level gate optimization through pulse-level control synthesis. Using a modular integration framework connecting a C++ circuit optimizer with Lindblad-based pulse simulation, we systematically evaluate the fidelity impact of four optimization passes---gate cancellation, commutation, rotation merging, and identity elimination---on IQM Garnet hardware parameters. Our simulation campaign spanning 4{,}452 experiment runs across 371 benchmark circuits reveals that gate cancellation provides the dominant improvement ($d = 1.53$, 87.3\% of circuits improved, 7{,}064 gates eliminated), while pulse duration exhibits the strongest negative correlation with process fidelity ($r = -0.905$, $R^2 = 0.819$). A formal ablation study demonstrates that pass ordering has no significant effect on two-qubit gate reduction (Kruskal--Wallis $p = 0.996$). Comparison against Qiskit transpilation levels shows that our optimizer achieves superior two-qubit gate reduction on structured circuits (87.8\% on QFT, 100\% on QAOA), while Qiskit's higher total gate reduction is largely attributable to virtual basis gate consolidation. We validate these findings through hardware execution on the IQM Resonance Garnet 20-qubit processor, demonstrating 70\% gate reduction on QFT circuits with 100\% job success rate. Our open-source framework enables reproducible benchmarking of quantum compilation pipelines.
+We present a comprehensive analysis of quantum circuit fidelity across the full compilation stack, from high-level gate optimization through pulse-level control synthesis. Using a modular integration framework connecting a C++ circuit optimizer with Lindblad-based pulse simulation, we systematically evaluate the fidelity impact of four optimization passes---gate cancellation, commutation, rotation merging, and identity elimination---on IQM Garnet hardware parameters. Our simulation campaign spanning 4{,}452 experiment runs across 371 benchmark circuits reveals that gate cancellation provides the dominant improvement ($d = 1.53$, 87.3\% of circuits improved, 7{,}064 gates eliminated), while pulse duration exhibits the strongest negative correlation with process fidelity ($r = -0.868$, $R^2 = 0.754$). A formal ablation study demonstrates that pass ordering has no significant effect on two-qubit gate reduction (Kruskal--Wallis $p = 0.996$). Comparison against Qiskit transpilation levels shows that our optimizer achieves superior two-qubit gate reduction on structured circuits (87.8\% on QFT, 100\% on QAOA), while Qiskit's higher total gate reduction is largely attributable to virtual basis gate consolidation. We validate these findings through hardware execution on the IQM Resonance Garnet 20-qubit processor, demonstrating 70\% gate reduction on QFT circuits with 100\% job success rate. Our open-source framework enables reproducible benchmarking of quantum compilation pipelines.
 \end{abstract}
 
 \maketitle
@@ -96,7 +96,7 @@ Our contributions include:
     \item A modular integration architecture connecting C++ circuit optimization with Python pulse synthesis via subprocess communication;
     \item Systematic evaluation of four optimization passes on 371 benchmark circuits across 4{,}452 experiment runs, including a formal ablation study with individual, leave-one-out, and ordering analyses;
     \item Quantitative comparison against Qiskit transpilation levels (L0--L3) on both virtual and hardware-native basis gates, demonstrating that two-qubit gate counts---not total gate counts---are the appropriate comparison metric;
-    \item Quantitative analysis of fidelity scaling with circuit parameters, revealing pulse duration as the strongest predictor ($r = -0.905$);
+    \item Quantitative analysis of fidelity scaling with circuit parameters, revealing pulse duration as the strongest predictor ($r = -0.868$);
     \item Hardware validation on IQM Resonance Garnet (20 qubits), achieving 70\% gate reduction on QFT circuits with 100\% job success rate;
     \item Open-source tools for reproducible quantum compilation benchmarking.
 \end{itemize}
@@ -305,7 +305,7 @@ We conducted eight experiment types to systematically characterize fidelity, tot
 
 \textbf{Experiment 4: Routing Impact.} Comparison of fidelity with and without SABRE routing to quantify SWAP overhead on different topologies.
 
-\textbf{Experiment 5: Noise Sensitivity.} Four noise regimes (low: $T_1/T_2 = 100/80\ \mu$s, medium: 50/40, high: 20/15, very high: 10/5) to assess how optimization benefits scale with decoherence severity.
+\textbf{Experiment 5: Noise Sensitivity.} Four noise regimes (low: $T_1/T_2 = 100/50\ \mu$s, medium: 37/9.6, high: 20/5, very high: 10/2.5) to assess how optimization benefits scale with decoherence severity.
 
 \textbf{Experiment 6: Scaling Analysis.} Systematic variation of circuit size (qubits, depth, gate count) to characterize fidelity degradation and identify when optimization provides the greatest benefit.
 
@@ -416,22 +416,22 @@ We observe strong correlations between circuit parameters and process fidelity (
 
 \begin{table}[t]
 \centering
-\caption{Correlation of circuit parameters with process fidelity. Pulse duration is the strongest predictor, explaining 81.9\% of fidelity variance.}
+\caption{Correlation of circuit parameters with process fidelity. Pulse duration is the strongest predictor, explaining 75.4\% of fidelity variance.}
 \label{tab:scaling}
 \begin{tabular}{lcc}
 \toprule
 Parameter & Pearson $r$ & $R^2$ \\
 \midrule
-Pulse duration & $-0.905$ & 0.819 \\
-Input gates & $-0.606$ & 0.368 \\
-Input depth & $-0.585$ & 0.342 \\
-Input qubits & $-0.569$ & 0.324 \\
-Two-qubit gates & $-0.562$ & 0.315 \\
+Pulse duration & $-0.868$ & 0.754 \\
+Input gates & $-0.857$ & 0.734 \\
+Two-qubit gates & $-0.750$ & 0.563 \\
+Input depth & $-0.667$ & 0.445 \\
+Input qubits & $-0.659$ & 0.434 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pulse duration exhibits the strongest predictive power ($R^2 = 0.819$), explaining over 80\% of fidelity variance. This is physically expected: longer pulse sequences expose the quantum state to decoherence for a greater duration, and fidelity decays approximately as $\fid \approx \exp(-t_{\text{gate}}/T_2)$ for dephasing-dominated noise. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, even modest increases in circuit execution time cause substantial fidelity loss. This result suggests that reducing total circuit time---through both gate count reduction and parallelization---should be a primary optimization objective for NISQ applications.
+Pulse duration exhibits the strongest predictive power ($R^2 = 0.754$), explaining over 75\% of fidelity variance. This is physically expected: longer pulse sequences expose the quantum state to decoherence for a greater duration, and fidelity decays approximately as $\fid \approx \exp(-t_{\text{gate}}/T_2)$ for dephasing-dominated noise. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, even modest increases in circuit execution time cause substantial fidelity loss. This result suggests that reducing total circuit time---through both gate count reduction and parallelization---should be a primary optimization objective for NISQ applications.
 
 \begin{figure}[t]
     \centering
@@ -448,21 +448,21 @@ We evaluated optimization effectiveness across four noise regimes. The relative 
 
 \begin{table}[t]
 \centering
-\caption{Optimization benefit by noise regime. The relative improvement grows from 7\% (low noise) to 58\% (very high noise), demonstrating increasing importance of circuit optimization as hardware noise increases.}
+\caption{Optimization benefit by noise regime. The relative improvement grows from 8\% (low noise) to 50\% (very high noise), demonstrating increasing importance of circuit optimization as hardware noise increases.}
 \label{tab:noise}
 \begin{tabular}{lccc}
 \toprule
 Noise Level & $T_1/T_2$ ($\mu$s) & Baseline $\fid$ & Optimized $\fid$ \\
 \midrule
-Low & 100/80 & 0.85 & 0.91 \\
-Medium & 50/40 & 0.72 & 0.81 \\
-High & 20/15 & 0.54 & 0.68 \\
-Very High & 10/5 & 0.31 & 0.49 \\
+Low & 100/50 & 0.75 & 0.81 \\
+Medium & 37/9.6 & 0.51 & 0.60 \\
+High & 20/5 & 0.35 & 0.45 \\
+Very High & 10/2.5 & 0.20 & 0.30 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-In very high noise environments, optimization provides a 58\% relative improvement in fidelity ($\Delta\fid/\fid_{\text{baseline}} = (0.49 - 0.31)/0.31$), demonstrating the increasing importance of circuit optimization as hardware noise increases. This finding is consistent with the strong pulse duration--fidelity correlation: in noisy environments, every gate removed translates to less time exposed to decoherence.
+In very high noise environments, optimization provides a 50\% relative improvement in fidelity ($\Delta\fid/\fid_{\text{baseline}} = (0.30 - 0.20)/0.20$), demonstrating the increasing importance of circuit optimization as hardware noise increases. This finding is consistent with the strong pulse duration--fidelity correlation: in noisy environments, every gate removed translates to less time exposed to decoherence.
 
 %==============================================================================
 \section{Compiler Comparison}
@@ -738,7 +738,7 @@ Our results provide actionable guidance for quantum compiler design:
 
     \item \textbf{Target two-qubit gates:} The fidelity waterfall analysis shows two-qubit gates dominate the error budget. Compiler comparisons should report two-qubit gate counts, not just total gates. Qiskit's 47.7\% total gate reduction translates to only 9.3\% two-qubit gate reduction.
 
-    \item \textbf{Minimize pulse duration:} The strong correlation between pulse duration and fidelity ($r = -0.905$, $R^2 = 0.819$) emphasizes the importance of decoherence-aware optimization. This correlation is physically grounded: fidelity decays approximately exponentially with execution time as $\fid \approx \exp(-t/T_2)$, and with $T_2 = \SI{9.6}{\micro\second}$, even nanosecond-scale savings compound.
+    \item \textbf{Minimize pulse duration:} The strong correlation between pulse duration and fidelity ($r = -0.868$, $R^2 = 0.754$) emphasizes the importance of decoherence-aware optimization. This correlation is physically grounded: fidelity decays approximately exponentially with execution time as $\fid \approx \exp(-t/T_2)$, and with $T_2 = \SI{9.6}{\micro\second}$, even nanosecond-scale savings compound.
 
     \item \textbf{Don't over-engineer pass ordering:} Our ordering analysis ($p = 0.996$) demonstrates that these four passes can be applied in any order without significant performance difference. This simplifies compiler development and maintenance.
 
@@ -747,13 +747,13 @@ Our results provide actionable guidance for quantum compiler design:
 
 \subsection{Physical Interpretation of the Pulse Duration Correlation}
 
-The strong correlation $r = -0.905$ between pulse duration and process fidelity has a clear physical interpretation. In the Lindblad framework (Equation~\ref{eq:lindblad}), the decoherence channels act continuously during pulse execution. For a circuit with total pulse duration $t_{\text{total}}$, the fidelity loss due to dephasing alone scales as:
+The strong correlation $r = -0.868$ between pulse duration and process fidelity has a clear physical interpretation. In the Lindblad framework (Equation~\ref{eq:lindblad}), the decoherence channels act continuously during pulse execution. For a circuit with total pulse duration $t_{\text{total}}$, the fidelity loss due to dephasing alone scales as:
 \begin{equation}
     \fid_{\text{dephasing}} \approx \exp\left(-\frac{t_{\text{total}}}{T_2}\right)
     \label{eq:dephasing}
 \end{equation}
 
-With IQM Garnet's $T_2 = \SI{9.6}{\micro\second}$, a circuit requiring $\SI{1}{\micro\second}$ of total execution time loses approximately 10\% of its fidelity to dephasing alone, while a circuit requiring $\SI{5}{\micro\second}$ loses approximately 41\%. The remaining variance ($1 - R^2 = 0.181$) is attributable to gate errors, routing overhead, and circuit-specific factors such as the degree of entanglement.
+With IQM Garnet's $T_2 = \SI{9.6}{\micro\second}$, a circuit requiring $\SI{1}{\micro\second}$ of total execution time loses approximately 10\% of its fidelity to dephasing alone, while a circuit requiring $\SI{5}{\micro\second}$ loses approximately 41\%. The remaining variance ($1 - R^2 = 0.246$) is attributable to gate errors, routing overhead, and circuit-specific factors such as the degree of entanglement.
 
 This finding explains why two-qubit gate reduction is more important than single-qubit gate reduction: CZ gates have twice the duration (\SI{40}{\nano\second} vs.\ \SI{20}{\nano\second}) and $6\times$ the error rate compared to PRX gates. Each eliminated CZ gate reduces both the error contribution and the decoherence exposure time.
 
@@ -792,7 +792,7 @@ All software, data, and scripts used in this work are publicly available. The in
     \item Statistical analysis scripts (\texttt{experiments/statistical\_analysis.py}) that generate all tables and figures from raw results.
     \item A benchmark compiler comparison script (\texttt{experiments/benchmark\_compilers.py}) for reproducing the Qiskit comparison.
     \item The C++ optimizer source code (\texttt{quantum-circuit-optimizer/}) with 340 unit tests.
-    \item 251 Python integration tests validating the pipeline end-to-end.
+    \item 252 Python integration tests validating the pipeline end-to-end.
 \end{itemize}
 
 The full experiment campaign can be reproduced by building the C++ optimizer and running:
@@ -816,7 +816,7 @@ We have presented \texttt{qco-integration}, a framework for end-to-end fidelity 
 \begin{enumerate}
     \item Gate cancellation is the dominant optimization pass ($d = 1.53$, large effect), accounting for 87.3\% of circuits improved and all two-qubit gate elimination. The remaining three passes (commutation, rotation merging, identity elimination) contribute marginally ($d < 0.15$).
 
-    \item Pulse duration is the strongest predictor of process fidelity ($r = -0.905$, $R^2 = 0.819$), explained by exponential decoherence during pulse execution. This motivates optimization strategies that minimize total circuit execution time.
+    \item Pulse duration is the strongest predictor of process fidelity ($r = -0.868$, $R^2 = 0.754$), explained by exponential decoherence during pulse execution. This motivates optimization strategies that minimize total circuit execution time.
 
     \item QCO achieves superior two-qubit gate reduction on structured circuits (QFT: 87.8\%, QAOA: 100\%), while Qiskit's higher total gate reduction (47.7\% vs.\ 18.9\%) is attributable to virtual basis gate consolidation that does not reduce hardware-relevant two-qubit operations.
 

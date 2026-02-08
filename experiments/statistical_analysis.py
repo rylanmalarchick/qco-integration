@@ -28,11 +28,11 @@ from scipy import stats
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 
-COMPILER_PATH = RESULTS_DIR / "compiler_comparison" / "comparison_detail_20260207_195040.json"
+COMPILER_PATH = RESULTS_DIR / "compiler_comparison" / "comparison_detail_20260207_204727.json"
 ABLATION_PATH = RESULTS_DIR / "ablation" / "ablation_20260207_195322.json"
-BASELINE_PATH = RESULTS_DIR / "acm_tqc" / "baseline_20260207_193602.json"
-PER_PASS_PATH = RESULTS_DIR / "acm_tqc" / "per_pass_20260207_193611.json"
-PASS_COMB_PATH = RESULTS_DIR / "acm_tqc" / "pass_combinations_20260207_193630.json"
+BASELINE_PATH = RESULTS_DIR / "acm_tqc_real" / "baseline_20260207_204438.json"
+PER_PASS_PATH = RESULTS_DIR / "acm_tqc_real" / "per_pass_20260207_204449.json"
+PASS_COMB_PATH = RESULTS_DIR / "acm_tqc_real" / "pass_combinations_20260207_204507.json"
 
 LATEX_OUT = RESULTS_DIR / "latex_tables.tex"
 SUMMARY_OUT = RESULTS_DIR / "statistical_summary.txt"

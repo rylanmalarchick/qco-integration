@@ -628,6 +628,7 @@ class RealPulseGateCompiler:
         self.noise_params = noise_params
         self._compiler = RealGateCompiler(noise_params)
         self._last_metrics: dict[str, Any] | None = None
+        self._last_gate_stats: dict[str, int] | None = None
 
     def _parse_qubit_index(self, qubit: int | str) -> int:
         """Extract numeric qubit index from various formats.
@@ -698,27 +699,77 @@ class RealPulseGateCompiler:
             "state_fidelity": state_f,
         }
 
+        # Cache gate stats for re-simulation with different noise params
+        self._last_gate_stats = {
+            "num_qubits": num_qubits,
+            "num_gates": num_gates,
+            "num_two_qubit_gates": num_two_qubit,
+        }
+
         return self._last_metrics
 
     def simulate_with_noise(
         self,
         pulses: dict[str, Any],
-        noise_model: dict[str, float],  # noqa: ARG002
+        noise_model: dict[str, float],
     ) -> dict[str, float]:
-        """Return cached fidelities from compilation.
+        """Simulate with noise model, re-running Lindblad if params differ.
+
+        If noise_model matches the construction-time params, returns cached
+        fidelities. Otherwise, creates a fresh PulseSimulator and re-simulates.
 
         Args:
             pulses: Pulse data from compile_gate_sequence.
-            noise_model: Noise parameters (already included in compilation).
+            noise_model: Noise parameters (t1_ns, t2_ns, error rates).
 
         Returns:
-            Dictionary with fidelities.
+            Dictionary with process_fidelity and state_fidelity.
         """
-        # Fidelity was computed during compilation
-        return {
-            "process_fidelity": pulses.get("process_fidelity", 0.9),
-            "state_fidelity": pulses.get("state_fidelity", 0.9),
+        # Check if noise params match the default (cached result is valid)
+        default_noise = {
+            "t1_ns": self.noise_params.t1_ns,
+            "t2_ns": self.noise_params.t2_ns,
+            "single_qubit_error": self.noise_params.single_qubit_error,
+            "two_qubit_error": self.noise_params.two_qubit_error,
         }
+        if noise_model == default_noise:
+            return {
+                "process_fidelity": pulses.get("process_fidelity", 0.9),
+                "state_fidelity": pulses.get("state_fidelity", 0.9),
+            }
+
+        # Noise params differ — re-simulate with override noise
+        if self._last_gate_stats is None:
+            # Fallback: no cached gate stats, return pulses as-is
+            return {
+                "process_fidelity": pulses.get("process_fidelity", 0.9),
+                "state_fidelity": pulses.get("state_fidelity", 0.9),
+            }
+
+        from src.pulse import RealGateCompiler
+
+        override_noise = NoiseParams(
+            t1_ns=noise_model.get("t1_ns", self.noise_params.t1_ns),
+            t2_ns=noise_model.get("t2_ns", self.noise_params.t2_ns),
+            single_qubit_error=noise_model.get(
+                "single_qubit_error", self.noise_params.single_qubit_error
+            ),
+            two_qubit_error=noise_model.get(
+                "two_qubit_error", self.noise_params.two_qubit_error
+            ),
+        )
+        compiler = RealGateCompiler(override_noise)
+        proc_f, state_f, _metrics = compiler.compile_and_simulate(
+            qasm="",
+            num_qubits=self._last_gate_stats["num_qubits"],
+            num_gates=self._last_gate_stats["num_gates"],
+            num_two_qubit_gates=self._last_gate_stats["num_two_qubit_gates"],
+        )
+        return {
+            "process_fidelity": proc_f,
+            "state_fidelity": state_f,
+        }
+
 
 
 def create_real_pipeline(

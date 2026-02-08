@@ -22,13 +22,13 @@ STATISTICAL ANALYSIS SUMMARY - QCO ACM TQC Submission
 
 3. COMPILER COMPARISON
 ----------------------------------------
-   QCO            : gate= 18.9%  2Q= 17.7% [14.2, 21.4]  depth= 13.9%  time=0.0037s
-   Qiskit-L0      : gate=  0.0%  2Q=  0.0% [0.0, 0.0]  depth=  0.0%  time=0.0031s
-   Qiskit-L1      : gate= 42.9%  2Q=  2.6% [1.8, 3.5]  depth= 34.3%  time=0.0041s
-   Qiskit-L1-IQM  : gate=  8.8%  2Q=  2.2% [1.2, 3.2]  depth=-14.4%  time=0.0048s
-   Qiskit-L2      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0074s
-   Qiskit-L3      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0090s
-   Qiskit-L3-IQM  : gate= 17.4%  2Q= 13.4% [11.4, 15.5]  depth= -5.8%  time=0.0116s
+   QCO            : gate= 18.9%  2Q= 17.7% [14.2, 21.4]  depth= 13.9%  time=0.0036s
+   Qiskit-L0      : gate=  0.0%  2Q=  0.0% [0.0, 0.0]  depth=  0.0%  time=0.0029s
+   Qiskit-L1      : gate= 42.9%  2Q=  2.6% [1.8, 3.5]  depth= 34.3%  time=0.0039s
+   Qiskit-L1-IQM  : gate=  8.8%  2Q=  2.2% [1.2, 3.2]  depth=-14.4%  time=0.0046s
+   Qiskit-L2      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0070s
+   Qiskit-L3      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0085s
+   Qiskit-L3-IQM  : gate= 17.4%  2Q= 13.4% [11.4, 15.5]  depth= -5.8%  time=0.0111s
 
    Wilcoxon signed-rank test (QCO vs each, on 2Q gate reduction):
    vs Qiskit-L0      : W=0.0, p < 0.001, N_pairs=371, N_nonzero=127

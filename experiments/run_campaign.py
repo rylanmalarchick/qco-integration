@@ -449,19 +449,31 @@ def generate_figures(all_results: dict[str, Any]) -> None:
         optimized_results = all_results["pass_combinations"].successful_results()
 
         if baseline_results and optimized_results:
-            # Extract fidelity values for comparison
-            labels = [r.circuit_name for r in baseline_results[:10]]  # Limit to 10
-            baseline_fidelities = [r.process_fidelity for r in baseline_results[:10]]
-            optimized_fidelities = [r.process_fidelity for r in optimized_results[:10]]
+            # Match results by circuit name for aligned comparison
+            baseline_by_name = {r.circuit_name: r for r in baseline_results}
+            optimized_by_name = {r.circuit_name: r for r in optimized_results}
+            common_names = [
+                name for name in baseline_by_name
+                if name in optimized_by_name
+            ][:10]  # Limit to 10
 
-            plot_comparison_bar_chart(
-                labels=labels,
-                baseline_values=baseline_fidelities,
-                optimized_values=optimized_fidelities,
-                metric_name="Process Fidelity",
-                save_path=FIGURES_DIR / "baseline_vs_optimized.pdf",
-            )
-            logger.info("  - baseline_vs_optimized.pdf")
+            if common_names:
+                labels = common_names
+                baseline_fidelities = [
+                    baseline_by_name[n].process_fidelity for n in common_names
+                ]
+                optimized_fidelities = [
+                    optimized_by_name[n].process_fidelity for n in common_names
+                ]
+
+                plot_comparison_bar_chart(
+                    labels=labels,
+                    baseline_values=baseline_fidelities,
+                    optimized_values=optimized_fidelities,
+                    metric_name="Process Fidelity",
+                    save_path=FIGURES_DIR / "baseline_vs_optimized.pdf",
+                )
+                logger.info("  - baseline_vs_optimized.pdf")
 
 
 def generate_report(all_results: dict[str, Any]) -> None:

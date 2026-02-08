@@ -1,0 +1,48 @@
+\documentclass[11pt]{letter}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\signature{Rylan Malarchick\\
+Department of Engineering Physics\\
+Embry-Riddle Aeronautical University\\
+Daytona Beach, FL 32114\\
+\texttt{malarchr@erau.edu}}
+
+\address{Rylan Malarchick\\
+Department of Engineering Physics\\
+Embry-Riddle Aeronautical University\\
+Daytona Beach, FL 32114}
+
+\begin{document}
+
+\begin{letter}{Editor-in-Chief\\
+ACM Transactions on Quantum Computing}
+
+\opening{Dear Editor,}
+
+I am pleased to submit the manuscript ``End-to-End Fidelity Analysis of Quantum Circuit Optimization: From Gate-Level Transformations to Pulse-Level Control'' for consideration in \textit{ACM Transactions on Quantum Computing}.
+
+This work presents a comprehensive framework for analyzing how gate-level circuit optimization decisions propagate through the full quantum compilation stack to affect physical pulse-level fidelity. The key contributions are:
+
+\begin{enumerate}
+    \item \textbf{End-to-end fidelity analysis.} We connect a high-performance C++ circuit optimizer with Lindblad-based pulse simulation, enabling systematic evaluation of four optimization passes on 371 benchmark circuits across 4,452 experiment runs. We find that gate cancellation alone accounts for essentially all optimization benefit ($d = 1.53$, large effect), and that pulse duration is the strongest predictor of process fidelity ($r = -0.868$, $R^2 = 0.754$).
+
+    \item \textbf{Compiler comparison methodology.} We demonstrate that two-qubit gate counts---not total gate counts---are the appropriate metric for comparing quantum compilers targeting hardware execution. Our optimizer achieves 87.8\% two-qubit gate reduction on QFT and 100\% on QAOA circuits, while Qiskit's higher total gate reduction (47.7\%) translates to only 9.3\% two-qubit gate reduction due to virtual basis gate consolidation.
+
+    \item \textbf{Formal ablation study.} Individual pass, leave-one-out, and ordering analyses with statistical significance testing (Kruskal--Wallis, Cohen's $d$, Wilcoxon) provide rigorous quantification of each optimization pass's contribution.
+
+    \item \textbf{Hardware validation.} We validate simulation predictions on the IQM Resonance Garnet 20-qubit superconducting processor, achieving 70\% gate reduction on QFT circuits with 100\% job success rate.
+
+    \item \textbf{Reproducibility.} All software, data, and analysis scripts are open-source, enabling full reproduction of all experiments and figures.
+\end{enumerate}
+
+We believe this work is well-suited for ACM TQC because it addresses a gap at the intersection of quantum compilation (software engineering) and quantum hardware characterization (physics), providing actionable guidance for compiler designers. The emphasis on rigorous statistical methodology, fair comparison metrics, and hardware validation aligns with the journal's standards for impactful quantum computing research.
+
+An earlier version of this work appeared as arXiv:2601.20871. The current submission has been substantially revised with real pipeline data (replacing mock simulation data), an expanded compiler comparison, a formal ablation study, and comprehensive bibliography.
+
+This manuscript has not been submitted elsewhere and is not under consideration at any other journal. The author declares no conflicts of interest.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}

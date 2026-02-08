@@ -83,7 +83,7 @@ We present a comprehensive analysis of quantum circuit fidelity across the full 
 \label{sec:introduction}
 %==============================================================================
 
-The fidelity of quantum computations on near-term noisy intermediate-scale quantum (NISQ) devices~\cite{preskill2018quantum} is fundamentally limited by gate errors, decoherence, and the overhead introduced during circuit compilation. While significant effort has been invested in developing gate-level optimization passes~\cite{nam2018automated,kissinger2020reducing,lubasch2025tensor}, the end-to-end impact of these transformations on physical pulse-level fidelity remains insufficiently characterized.
+The fidelity of quantum computations on near-term noisy intermediate-scale quantum (NISQ) devices~\cite{preskill2018quantum} is fundamentally limited by gate errors, decoherence, and the overhead introduced during circuit compilation~\cite{arute2019quantum,kim2023evidence}. While significant effort has been invested in developing gate-level optimization passes~\cite{nam2018automated,kissinger2020reducing,lubasch2025tensor}, the end-to-end impact of these transformations on physical pulse-level fidelity remains insufficiently characterized.
 
 Modern quantum compilation involves multiple stages: (1) logical circuit optimization to reduce gate count and depth, (2) routing and mapping to hardware connectivity constraints, (3) native gate decomposition, and (4) pulse-level synthesis~\cite{shi2019optimized}. Each stage introduces potential fidelity degradation, yet optimization strategies are typically evaluated in isolation without considering their downstream effects. This fragmented approach fails to capture the complex interplay between gate-level decisions and physical execution fidelity.
 
@@ -156,7 +156,7 @@ We model pulse-level dynamics using the Lindblad master equation for open quantu
 \end{equation}
 where $\ham(t)$ is the time-dependent control Hamiltonian, $L_k$ are Lindblad operators representing decoherence channels (energy relaxation and dephasing), and $\gamma_k$ are the associated rates derived from $T_1$ and $T_2$ times.
 
-For superconducting transmon qubits, the primary decoherence mechanisms are:
+For superconducting transmon qubits~\cite{koch2007transmon}, the primary decoherence mechanisms are:
 \begin{itemize}
     \item \textbf{Energy relaxation ($T_1$):} Spontaneous decay from $\ket{1}$ to $\ket{0}$ with rate $\gamma_1 = 1/T_1$.
     \item \textbf{Dephasing ($T_2$):} Loss of phase coherence with pure dephasing rate $\gamma_\phi = 1/T_2 - 1/(2T_1)$.
@@ -166,7 +166,7 @@ The fidelity of a circuit is thus determined by the interplay between the number
 
 \subsection{IQM Garnet Architecture}
 
-The IQM Garnet processor~\cite{iqm2024garnet} features 20 superconducting transmon qubits arranged in a heavy-hex-inspired topology with 30 nearest-neighbor connections. Table~\ref{tab:hardware} summarizes the key hardware parameters used in our simulations.
+The IQM Garnet processor~\cite{iqm2024garnet} features 20 superconducting transmon qubits arranged in a heavy-hex-inspired topology~\cite{chamberland2020heavy} with 30 nearest-neighbor connections. Table~\ref{tab:hardware} summarizes the key hardware parameters used in our simulations.
 
 \begin{table}[t]
 \centering
@@ -285,11 +285,11 @@ Random & 303 & 2--16 & 5--30 \\
 \end{tabular}
 \end{table}
 
-\textbf{GHZ States (2--20 qubits).} Greenberger--Horne--Zeilinger preparation circuits consisting of an initial Hadamard followed by a chain of CNOTs. These circuits have depth linear in qubit count and are already relatively efficient, testing the optimizer's ability to recognize minimal circuits.
+\textbf{GHZ States (2--20 qubits).} Greenberger--Horne--Zeilinger~\cite{greenberger1989bell} preparation circuits consisting of an initial Hadamard followed by a chain of CNOTs. These circuits have depth linear in qubit count and are already relatively efficient, testing the optimizer's ability to recognize minimal circuits.
 
-\textbf{QFT (2--16 qubits).} Quantum Fourier Transform circuits containing dense sequences of controlled rotations. QFT circuits are rich in rotation merging opportunities and test the full optimization pipeline.
+\textbf{QFT (2--16 qubits).} Quantum Fourier Transform~\cite{nielsen2010quantum} circuits containing dense sequences of controlled rotations. QFT circuits are rich in rotation merging opportunities and test the full optimization pipeline.
 
-\textbf{QAOA (4--8 qubits).} Quantum Approximate Optimization Algorithm circuits for MaxCut problems on random graphs. These circuits contain repeated layers of ZZ interactions and X rotations, testing rotation merging and commutation.
+\textbf{QAOA (4--8 qubits).} Quantum Approximate Optimization Algorithm~\cite{farhi2014qaoa} circuits for MaxCut problems on random graphs. These circuits contain repeated layers of ZZ interactions and X rotations, testing rotation merging and commutation.
 
 \textbf{Random Circuits (2--16 qubits).} Random circuits with controlled depth (5--30 layers) generated using random gate selection from the universal gate set. These stress-test the optimizer on unstructured circuits.
 
@@ -317,7 +317,7 @@ We conducted eight experiment types to systematically characterize fidelity, tot
 
 We compute two fidelity measures:
 
-\textbf{Process Fidelity.} The overlap between the implemented and target unitary operations:
+\textbf{Process Fidelity.} The overlap between the implemented and target unitary operations~\cite{nielsen2010quantum}:
 \begin{equation}
     \fid_{\text{proc}} = \frac{|\text{Tr}(U_{\text{target}}^{\dagger} U_{\text{impl}})|^2}{d^2}
 \end{equation}
@@ -331,7 +331,7 @@ State fidelity measures how well a specific computational result is preserved.
 
 \subsection{Statistical Methods}
 
-We report effect sizes using Cohen's $d$~\cite{cohen1988statistical}, interpreted as negligible ($d < 0.2$), small ($0.2 \leq d < 0.5$), medium ($0.5 \leq d < 0.8$), or large ($d \geq 0.8$). For non-parametric comparisons between compiler outputs, we use the paired Wilcoxon signed-rank test~\cite{wilcoxon1945individual}, reporting exact $p$-values when $p > 0.001$ and $p < 0.001$ otherwise. For multi-group comparisons, we use the Kruskal--Wallis $H$ test to avoid distributional assumptions.
+We report effect sizes using Cohen's $d$~\cite{cohen1988statistical}, interpreted as negligible ($d < 0.2$), small ($0.2 \leq d < 0.5$), medium ($0.5 \leq d < 0.8$), or large ($d \geq 0.8$). For non-parametric comparisons between compiler outputs, we use the paired Wilcoxon signed-rank test~\cite{wilcoxon1945individual}, reporting exact $p$-values when $p > 0.001$ and $p < 0.001$ otherwise. For multi-group comparisons, we use the Kruskal--Wallis $H$ test~\cite{kruskal1952use} to avoid distributional assumptions.
 
 %==============================================================================
 \section{Simulation Results}
@@ -431,7 +431,7 @@ Input qubits & $-0.659$ & 0.434 \\
 \end{tabular}
 \end{table}
 
-Pulse duration exhibits the strongest predictive power ($R^2 = 0.754$), explaining over 75\% of fidelity variance. This is physically expected: longer pulse sequences expose the quantum state to decoherence for a greater duration, and fidelity decays approximately as $\fid \approx \exp(-t_{\text{gate}}/T_2)$ for dephasing-dominated noise. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, even modest increases in circuit execution time cause substantial fidelity loss. This result suggests that reducing total circuit time---through both gate count reduction and parallelization---should be a primary optimization objective for NISQ applications.
+Pulse duration exhibits the strongest predictive power ($R^2 = 0.754$), explaining over 75\% of fidelity variance. This is physically expected: longer pulse sequences expose the quantum state to decoherence for a greater duration, and fidelity decays approximately as $\fid \approx \exp(-t_{\text{gate}}/T_2)$ for dephasing-dominated noise~\cite{krantz2019quantum}. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, even modest increases in circuit execution time cause substantial fidelity loss. This result suggests that reducing total circuit time---through both gate count reduction and parallelization---should be a primary optimization objective for NISQ applications.
 
 \begin{figure}[t]
     \centering
@@ -469,7 +469,7 @@ In very high noise environments, optimization provides a 50\% relative improveme
 \label{sec:compiler}
 %==============================================================================
 
-A critical question for quantum compiler design is how different optimization strategies compare on hardware-relevant metrics. We benchmark our C++ optimizer (QCO) against Qiskit's transpiler~\cite{qiskit2024} at multiple optimization levels on the full 371-circuit corpus.
+A critical question for quantum compiler design is how different optimization strategies compare on hardware-relevant metrics~\cite{li2023qasmbench}. We benchmark our C++ optimizer (QCO) against Qiskit's transpiler~\cite{qiskit2024} at multiple optimization levels on the full 371-circuit corpus.
 
 \subsection{Experimental Setup}
 
@@ -536,7 +536,7 @@ QCO dominates on \emph{structured} circuits:
     \item \textbf{QAOA:} QCO eliminates 100\% of two-qubit gates, compared to 1.5\% for Qiskit-L3. The cancellation pass identifies and removes all redundant CZ gates in the QAOA circuit structure, which consists of alternating layers of entangling and rotation gates where adjacent inverse pairs arise naturally.
     \item \textbf{QFT:} QCO eliminates 87.8\% of two-qubit gates, compared to 12.2\% for Qiskit-L3. The rotation merging and cancellation passes exploit the regular structure of controlled rotation sequences in the QFT.
     \item \textbf{GHZ:} All compilers correctly identify that GHZ circuits are already minimal (0\% reduction).
-    \item \textbf{Random:} Qiskit-L3-IQM outperforms QCO (16.0\% vs.\ 3.2\%), as Qiskit's broader optimization passes (including KAK decomposition and template matching) find opportunities in unstructured circuits that our four passes miss.
+    \item \textbf{Random:} Qiskit-L3-IQM outperforms QCO (16.0\% vs.\ 3.2\%), as Qiskit's broader optimization passes (including KAK decomposition~\cite{vatan2004optimal} and template matching) find opportunities in unstructured circuits that our four passes miss.
 \end{itemize}
 
 \subsection{Head-to-Head Analysis}
@@ -570,7 +570,7 @@ Second, \emph{domain-specific optimizations matter}. QCO's simple four-pass pipe
 \label{sec:ablation}
 %==============================================================================
 
-To isolate the contribution of each optimization pass, we conduct a formal ablation study with three analyses: individual pass evaluation, leave-one-out analysis, and pass ordering sensitivity.
+To isolate the contribution of each optimization pass, we conduct a formal ablation study~\cite{meyes2019ablation} with three analyses: individual pass evaluation, leave-one-out analysis, and pass ordering sensitivity.
 
 \subsection{Individual Pass Evaluation}
 
@@ -654,7 +654,7 @@ rotate $\to$ cancel $\to$ commute $\to$ identity & 16.3\% & [14.8, 17.8] & 17.7\
 \end{tabular}
 \end{table*}
 
-The Kruskal--Wallis test yields $H = 0.36$, $p = 0.996$, indicating \emph{no significant ordering effect}. While cancel-first orderings achieve slightly higher total gate reduction (18.9\% vs.\ 16.3\%), the two-qubit gate reduction is invariant to ordering (17.7\% for all orderings tested). This is a practical finding for compiler designers: the ordering of these four passes does not need to be carefully tuned, and any ordering containing the cancellation pass will achieve nearly identical hardware-relevant optimization.
+The Kruskal--Wallis test yields $H = 0.36$, $p = 0.996$, indicating \emph{no significant ordering effect}. While cancel-first orderings achieve slightly higher total gate reduction (18.9\% vs.\ 16.3\%, 95\% bootstrap CIs~\cite{efron1993bootstrap}), the two-qubit gate reduction is invariant to ordering (17.7\% for all orderings tested). This is a practical finding for compiler designers: the ordering of these four passes does not need to be carefully tuned, and any ordering containing the cancellation pass will achieve nearly identical hardware-relevant optimization.
 
 \subsection{Summary of Ablation Findings}
 
@@ -843,7 +843,7 @@ AI-assisted tools (Claude, Anthropic) were used for code development and manuscr
 % References
 %==============================================================================
 
-\begin{thebibliography}{32}
+\begin{thebibliography}{44}
 
 \bibitem{preskill2018quantum}
 J.~Preskill.
@@ -1004,6 +1004,67 @@ J.~Cohen.
 F.~Wilcoxon.
 \newblock Individual comparisons by ranking methods.
 \newblock {\em Biometrics Bulletin}, 1(6):80--83, 1945.
+
+
+\bibitem{arute2019quantum}
+F.~Arute, K.~Arya, R.~Babbush, et~al.
+\newblock Quantum supremacy using a programmable superconducting processor.
+\newblock {\em Nature}, 574(7779):505--510, 2019.
+
+\bibitem{koch2007transmon}
+J.~Koch, T.~M. Yu, J.~Gambetta, A.~A. Houck, D.~I. Schuster, J.~Majer, A.~Blais, M.~H. Devoret, S.~M. Girvin, and R.~J. Schoelkopf.
+\newblock Charge-insensitive qubit design derived from the {C}ooper pair box.
+\newblock {\em Physical Review A}, 76(4):042319, 2007.
+
+\bibitem{chamberland2020heavy}
+C.~Chamberland, G.~Zhu, T.~J. Yoder, J.~B. Hertzberg, and A.~W. Cross.
+\newblock Topological and subsystem codes on low-degree graphs with flag qubits.
+\newblock {\em Physical Review X}, 10(1):011022, 2020.
+
+\bibitem{greenberger1989bell}
+D.~M. Greenberger, M.~A. Horne, and A.~Zeilinger.
+\newblock Going beyond {B}ell's theorem.
+\newblock In {\em Bell's Theorem, Quantum Theory and Conceptions of the Universe}, pages 69--72. Springer, 1989.
+
+\bibitem{farhi2014qaoa}
+E.~Farhi, J.~Goldstone, and S.~Gutmann.
+\newblock A quantum approximate optimization algorithm.
+\newblock arXiv:1411.4028, 2014.
+
+\bibitem{kruskal1952use}
+W.~H. Kruskal and W.~A. Wallis.
+\newblock Use of ranks in one-criterion variance analysis.
+\newblock {\em Journal of the American Statistical Association}, 47(260):583--621, 1952.
+
+\bibitem{krantz2019quantum}
+P.~Krantz, M.~Kjaergaard, F.~Yan, T.~P. Orlando, S.~Gustavsson, and W.~D. Oliver.
+\newblock A quantum engineer's guide to superconducting qubits.
+\newblock {\em Applied Physics Reviews}, 6(2):021318, 2019.
+
+\bibitem{li2023qasmbench}
+A.~Li, S.~Stein, S.~Krishnamoorthy, and J.~Ang.
+\newblock {QASMBench}: A low-level quantum benchmark suite for {NISQ} evaluation and simulation.
+\newblock {\em ACM Transactions on Quantum Computing}, 4(2):10:1--10:26, 2023.
+
+\bibitem{vatan2004optimal}
+F.~Vatan and C.~Williams.
+\newblock Optimal quantum circuits for general two-qubit gates.
+\newblock {\em Physical Review A}, 69(3):032315, 2004.
+
+\bibitem{meyes2019ablation}
+R.~Meyes, M.~Lu, C.~W. de~Puiseau, and T.~Meisen.
+\newblock Ablation studies in artificial neural networks.
+\newblock arXiv:1901.08644, 2019.
+
+\bibitem{efron1993bootstrap}
+B.~Efron and R.~J. Tibshirani.
+\newblock {\em An Introduction to the Bootstrap}.
+\newblock Chapman \& Hall/CRC, 1993.
+
+\bibitem{kim2023evidence}
+Y.~Kim, A.~Eddins, S.~Anand, K.~X. Wei, E.~van~den~Berg, S.~Rosenblatt, H.~Nayfeh, Y.~Wu, M.~Zaletel, K.~Temme, and A.~Kandala.
+\newblock Evidence for the utility of quantum computing before fault tolerance.
+\newblock {\em Nature}, 618(7965):500--505, 2023.
 
 \end{thebibliography}
 

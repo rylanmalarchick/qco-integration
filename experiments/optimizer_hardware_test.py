@@ -64,7 +64,7 @@ logger = logging.getLogger(__name__)
 # Default optimizer binary location
 DEFAULT_OPTIMIZER_BINARY = (
     Path.home()
-    / "Documents/career/code_bases/research/compilers/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
+    / "dev/research/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
 )
 
 # Output directory

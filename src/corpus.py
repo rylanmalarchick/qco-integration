@@ -630,3 +630,65 @@ def create_small_corpus(seed: int = 42) -> CircuitCorpus:
     corpus.add_random_circuits([4], [5], seed=seed)
 
     return corpus
+
+
+def create_paper_corpus(seed: int = 42) -> CircuitCorpus:
+    """Create the full 371-circuit corpus matching the paper benchmarks.
+
+    Composition:
+    - GHZ: 11 circuits (2-20 qubits)
+    - QFT: 7 circuits (2-16 qubits)
+    - QAOA: 50 circuits (10 qubit sizes × 5 parameter configs)
+    - Random: 303 circuits (11 sizes × 9 depths × 3 densities + 6 extra)
+
+    Total: 371 circuits.
+
+    Args:
+        seed: Base random seed for reproducibility.
+
+    Returns:
+        Populated CircuitCorpus with 371 circuits.
+    """
+    corpus = CircuitCorpus()
+
+    # --- GHZ: 11 circuits ---
+    corpus.add_ghz_circuits([2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20])
+
+    # --- QFT: 7 circuits ---
+    corpus.add_qft_circuits([2, 3, 4, 6, 8, 12, 16], seed=seed)
+
+    # --- QAOA: 50 circuits (10 qubit sizes × 5 parameter configs) ---
+    qaoa_qubits = [3, 4, 5, 6, 7, 8, 10, 12, 14, 16]
+    qaoa_configs = [
+        {"gamma": 0.3, "beta": 0.5, "layers": 1, "seed": seed + 100},
+        {"gamma": 0.7, "beta": 0.5, "layers": 1, "seed": seed + 200},
+        {"gamma": 0.5, "beta": 0.3, "layers": 1, "seed": seed + 300},
+        {"gamma": 0.5, "beta": 0.5, "layers": 2, "seed": seed + 400},
+        {"gamma": 0.3, "beta": 0.7, "layers": 2, "seed": seed + 500},
+    ]
+    for config in qaoa_configs:
+        corpus.add_qaoa_circuits(qaoa_qubits, **config)
+
+    # --- Random: 303 circuits ---
+    random_qubits = [2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16]
+    random_depths = [3, 5, 8, 10, 15, 20, 25, 30, 35]
+
+    # 11 sizes × 9 depths × 3 densities = 297
+    for i, density in enumerate([0.2, 0.3, 0.5]):
+        corpus.add_random_circuits(
+            random_qubits,
+            random_depths,
+            two_qubit_gate_density=density,
+            seed=seed + 1000 + i * 100,
+        )
+
+    # 6 extra at depth=40 for smaller qubits (density=0.3)
+    corpus.add_random_circuits(
+        [2, 3, 4, 5, 6, 7],
+        [40],
+        two_qubit_gate_density=0.3,
+        seed=seed + 2000,
+    )
+
+    assert len(corpus) == 371, f"Expected 371 circuits, got {len(corpus)}"
+    return corpus

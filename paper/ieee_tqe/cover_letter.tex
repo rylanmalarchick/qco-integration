@@ -1,0 +1,53 @@
+\documentclass[11pt]{letter}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\signature{Rylan Malarchick\\
+Department of Engineering Physics\\
+Embry-Riddle Aeronautical University\\
+\texttt{malarchr@erau.edu}}
+
+\address{Rylan Malarchick\\
+Department of Engineering Physics\\
+Embry-Riddle Aeronautical University\\
+1 Aerospace Boulevard\\
+Daytona Beach, FL 32114}
+
+\begin{document}
+
+\begin{letter}{Editor-in-Chief\\
+IEEE Transactions on Quantum Engineering}
+
+\opening{Dear Editor,}
+
+I am pleased to submit our manuscript entitled \textbf{``End-to-End Fidelity Analysis of Quantum Circuit Optimization: From Gate-Level Transformations to Pulse-Level Control''} for consideration in IEEE Transactions on Quantum Engineering.
+
+\textbf{Summary:} This work presents a comprehensive framework for analyzing quantum circuit fidelity across the full compilation stack, integrating gate-level optimization with pulse-level simulation. We systematically evaluate the impact of circuit optimization passes on physical fidelity using IQM Garnet hardware parameters and validate findings through real hardware execution on IQM Resonance. Key contributions include:
+
+\begin{itemize}
+    \item A modular C++/Python integration architecture connecting circuit optimization with Lindblad-based pulse simulation
+    \item Systematic evaluation of four optimization passes across 371 benchmark circuits, revealing gate cancellation as the most effective (68\% improvement rate, 14,024 gates eliminated)
+    \item Quantitative scaling analysis showing pulse duration as the strongest fidelity predictor ($r = -0.74$, $R^2 = 0.55$)
+    \item Hardware validation on IQM Resonance Garnet (20 qubits), achieving 70\% gate reduction on QFT circuits with 100\% job success rate
+    \item Open-source release enabling reproducible quantum compilation benchmarking
+\end{itemize}
+
+\textbf{Relevance to IEEE TQE:} This manuscript addresses the critical but underexplored question of how gate-level optimizations affect physical pulse-level fidelity---directly relevant to TQE's focus on quantum engineering. Our hardware-validated framework provides actionable guidance for compiler design in the NISQ era.
+
+\textbf{Prior Publication:} An earlier version appeared as arXiv preprint 2601.20871 (January 2026). This submission is substantially expanded with additional analysis and hardware validation results.
+
+\textbf{Suggested Reviewers:}
+\begin{itemize}
+    \item Prof. Fred Chong (University of Chicago) -- quantum compiler architecture
+    \item Prof. Margaret Martonosi (Princeton) -- quantum systems and compilation
+    \item Dr. Ali Javadi-Abhari (IBM Quantum) -- Qiskit compiler development
+\end{itemize}
+
+I confirm that this manuscript has not been published elsewhere and is not under consideration by another journal.
+
+Thank you for considering our submission.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}

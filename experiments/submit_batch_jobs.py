@@ -64,7 +64,7 @@ def main():
     executor = IQMHardwareExecutor(quantum_computer='garnet', dry_run=False)
     optimizer_binary = (
         Path.home()
-        / "Documents/career/code_bases/research/compilers/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
+        / "dev/research/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
     )
     optimizer = CircuitOptimizerBridge(str(optimizer_binary))
     

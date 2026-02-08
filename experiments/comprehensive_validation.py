@@ -49,7 +49,7 @@ def main():
     
     optimizer_binary = (
         Path.home()
-        / "Documents/career/code_bases/research/compilers/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
+        / "dev/research/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
     )
     optimizer = CircuitOptimizerBridge(str(optimizer_binary))
     passes = ["cancel", "commute", "rotate"]

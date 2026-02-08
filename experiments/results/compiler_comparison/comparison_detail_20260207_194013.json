@@ -1,0 +1,464 @@
+{
+  "timestamp": "2026-02-07T19:40:13.055994",
+  "corpus_size": 4,
+  "total_time_s": 6.581624746322632,
+  "results": [
+    {
+      "compiler": "QCO",
+      "circuit_name": "ghz_4q",
+      "input_gates": 4,
+      "input_depth": 4,
+      "output_gates": 4,
+      "output_depth": 4,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0026621409997460432,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L0",
+      "circuit_name": "ghz_4q",
+      "input_gates": 4,
+      "input_depth": 4,
+      "output_gates": 4,
+      "output_depth": 4,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0016014220018405467,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L1",
+      "circuit_name": "ghz_4q",
+      "input_gates": 4,
+      "input_depth": 4,
+      "output_gates": 4,
+      "output_depth": 4,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.005033102999732364,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L2",
+      "circuit_name": "ghz_4q",
+      "input_gates": 4,
+      "input_depth": 4,
+      "output_gates": 4,
+      "output_depth": 4,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.007911911998235155,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L3",
+      "circuit_name": "ghz_4q",
+      "input_gates": 4,
+      "input_depth": 4,
+      "output_gates": 4,
+      "output_depth": 4,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.005772418997366913,
+      "error": null
+    },
+    {
+      "compiler": "QCO",
+      "circuit_name": "ghz_8q",
+      "input_gates": 8,
+      "input_depth": 8,
+      "output_gates": 8,
+      "output_depth": 8,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0031880090027698316,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L0",
+      "circuit_name": "ghz_8q",
+      "input_gates": 8,
+      "input_depth": 8,
+      "output_gates": 8,
+      "output_depth": 8,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.002262736998090986,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L1",
+      "circuit_name": "ghz_8q",
+      "input_gates": 8,
+      "input_depth": 8,
+      "output_gates": 8,
+      "output_depth": 8,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.002718476996960817,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L2",
+      "circuit_name": "ghz_8q",
+      "input_gates": 8,
+      "input_depth": 8,
+      "output_gates": 8,
+      "output_depth": 8,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.00410773700059508,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L3",
+      "circuit_name": "ghz_8q",
+      "input_gates": 8,
+      "input_depth": 8,
+      "output_gates": 8,
+      "output_depth": 8,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.004632198997569503,
+      "error": null
+    },
+    {
+      "compiler": "QCO",
+      "circuit_name": "qft_4q",
+      "input_gates": 30,
+      "input_depth": 21,
+      "output_gates": 6,
+      "output_depth": 2,
+      "gate_reduction_pct": 80.0,
+      "depth_reduction_pct": 90.47619047619048,
+      "compile_time_s": 0.002996134997374611,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L0",
+      "circuit_name": "qft_4q",
+      "input_gates": 30,
+      "input_depth": 21,
+      "output_gates": 30,
+      "output_depth": 21,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.002525710002373671,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L1",
+      "circuit_name": "qft_4q",
+      "input_gates": 30,
+      "input_depth": 21,
+      "output_gates": 27,
+      "output_depth": 20,
+      "gate_reduction_pct": 10.0,
+      "depth_reduction_pct": 4.761904761904762,
+      "compile_time_s": 0.002973295999254333,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L2",
+      "circuit_name": "qft_4q",
+      "input_gates": 30,
+      "input_depth": 21,
+      "output_gates": 25,
+      "output_depth": 19,
+      "gate_reduction_pct": 16.666666666666668,
+      "depth_reduction_pct": 9.523809523809524,
+      "compile_time_s": 0.006507958001748193,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L3",
+      "circuit_name": "qft_4q",
+      "input_gates": 30,
+      "input_depth": 21,
+      "output_gates": 25,
+      "output_depth": 19,
+      "gate_reduction_pct": 16.666666666666668,
+      "depth_reduction_pct": 9.523809523809524,
+      "compile_time_s": 0.006956904999242397,
+      "error": null
+    },
+    {
+      "compiler": "QCO",
+      "circuit_name": "random_4q_d5_density0.3",
+      "input_gates": 12,
+      "input_depth": 5,
+      "output_gates": 12,
+      "output_depth": 5,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0024717390006117057,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L0",
+      "circuit_name": "random_4q_d5_density0.3",
+      "input_gates": 12,
+      "input_depth": 5,
+      "output_gates": 12,
+      "output_depth": 5,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0029380329979176167,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L1",
+      "circuit_name": "random_4q_d5_density0.3",
+      "input_gates": 12,
+      "input_depth": 5,
+      "output_gates": 12,
+      "output_depth": 5,
+      "gate_reduction_pct": 0.0,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.0027456479983811732,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L2",
+      "circuit_name": "random_4q_d5_density0.3",
+      "input_gates": 12,
+      "input_depth": 5,
+      "output_gates": 10,
+      "output_depth": 5,
+      "gate_reduction_pct": 16.666666666666668,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.005265370997221908,
+      "error": null
+    },
+    {
+      "compiler": "Qiskit-L3",
+      "circuit_name": "random_4q_d5_density0.3",
+      "input_gates": 12,
+      "input_depth": 5,
+      "output_gates": 10,
+      "output_depth": 5,
+      "gate_reduction_pct": 16.666666666666668,
+      "depth_reduction_pct": 0.0,
+      "compile_time_s": 0.005872516998351784,
+      "error": null
+    }
+  ],
+  "summary": {
+    "compilers": {
+      "QCO": {
+        "n_circuits": 4,
+        "n_errors": 0,
+        "gate_reduction_pct": {
+          "mean": 20.0,
+          "std": 34.64101615137755,
+          "min": 0.0,
+          "max": 80.0,
+          "median": 0.0
+        },
+        "depth_reduction_pct": {
+          "mean": 22.61904761904762,
+          "std": 39.177339695010325,
+          "min": 0.0,
+          "max": 90.47619047619048,
+          "median": 0.0
+        },
+        "compile_time_s": {
+          "mean": 0.002829506000125548,
+          "std": 0.00027941809843063346,
+          "total": 0.011318024000502191
+        }
+      },
+      "Qiskit-L0": {
+        "n_circuits": 4,
+        "n_errors": 0,
+        "gate_reduction_pct": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "median": 0.0
+        },
+        "depth_reduction_pct": {
+          "mean": 0.0,
+          "std": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "median": 0.0
+        },
+        "compile_time_s": {
+          "mean": 0.002331975500055705,
+          "std": 0.0004856287501815957,
+          "total": 0.00932790200022282
+        }
+      },
+      "Qiskit-L1": {
+        "n_circuits": 4,
+        "n_errors": 0,
+        "gate_reduction_pct": {
+          "mean": 2.5,
+          "std": 4.330127018922194,
+          "min": 0.0,
+          "max": 10.0,
+          "median": 0.0
+        },
+        "depth_reduction_pct": {
+          "mean": 1.1904761904761905,
+          "std": 2.0619652471058063,
+          "min": 0.0,
+          "max": 4.761904761904762,
+          "median": 0.0
+        },
+        "compile_time_s": {
+          "mean": 0.0033676309985821717,
+          "std": 0.0009666386150819454,
+          "total": 0.013470523994328687
+        }
+      },
+      "Qiskit-L2": {
+        "n_circuits": 4,
+        "n_errors": 0,
+        "gate_reduction_pct": {
+          "mean": 8.333333333333334,
+          "std": 8.333333333333334,
+          "min": 0.0,
+          "max": 16.666666666666668,
+          "median": 8.333333333333334
+        },
+        "depth_reduction_pct": {
+          "mean": 2.380952380952381,
+          "std": 4.123930494211613,
+          "min": 0.0,
+          "max": 9.523809523809524,
+          "median": 0.0
+        },
+        "compile_time_s": {
+          "mean": 0.005948244499450084,
+          "std": 0.001416249741732237,
+          "total": 0.023792977997800335
+        }
+      },
+      "Qiskit-L3": {
+        "n_circuits": 4,
+        "n_errors": 0,
+        "gate_reduction_pct": {
+          "mean": 8.333333333333334,
+          "std": 8.333333333333334,
+          "min": 0.0,
+          "max": 16.666666666666668,
+          "median": 8.333333333333334
+        },
+        "depth_reduction_pct": {
+          "mean": 2.380952380952381,
+          "std": 4.123930494211613,
+          "min": 0.0,
+          "max": 9.523809523809524,
+          "median": 0.0
+        },
+        "compile_time_s": {
+          "mean": 0.005808509998132649,
+          "std": 0.0008227876556306997,
+          "total": 0.023234039992530597
+        }
+      }
+    },
+    "by_circuit_type": {
+      "GHZ": {
+        "QCO": {
+          "n_circuits": 2,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0029250750012579374
+        },
+        "Qiskit-L0": {
+          "n_circuits": 2,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0019320794999657664
+        },
+        "Qiskit-L1": {
+          "n_circuits": 2,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0038757899983465904
+        },
+        "Qiskit-L2": {
+          "n_circuits": 2,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.006009824499415117
+        },
+        "Qiskit-L3": {
+          "n_circuits": 2,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.005202308997468208
+        }
+      },
+      "QFT": {
+        "QCO": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 80.0,
+          "max_gate_reduction": 80.0,
+          "mean_compile_time": 0.002996134997374611
+        },
+        "Qiskit-L0": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.002525710002373671
+        },
+        "Qiskit-L1": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 10.0,
+          "max_gate_reduction": 10.0,
+          "mean_compile_time": 0.002973295999254333
+        },
+        "Qiskit-L2": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 16.666666666666668,
+          "max_gate_reduction": 16.666666666666668,
+          "mean_compile_time": 0.006507958001748193
+        },
+        "Qiskit-L3": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 16.666666666666668,
+          "max_gate_reduction": 16.666666666666668,
+          "mean_compile_time": 0.006956904999242397
+        }
+      },
+      "Random": {
+        "QCO": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0024717390006117057
+        },
+        "Qiskit-L0": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0029380329979176167
+        },
+        "Qiskit-L1": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 0.0,
+          "max_gate_reduction": 0.0,
+          "mean_compile_time": 0.0027456479983811732
+        },
+        "Qiskit-L2": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 16.666666666666668,
+          "max_gate_reduction": 16.666666666666668,
+          "mean_compile_time": 0.005265370997221908
+        },
+        "Qiskit-L3": {
+          "n_circuits": 1,
+          "mean_gate_reduction": 16.666666666666668,
+          "max_gate_reduction": 16.666666666666668,
+          "mean_compile_time": 0.005872516998351784
+        }
+      }
+    }
+  }
+}

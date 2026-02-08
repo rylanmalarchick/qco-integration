@@ -39,7 +39,7 @@ from src.analysis import (  # noqa: E402
     generate_experiment_summary,
 )
 from src.bridge import MockCircuitOptimizerBridge  # noqa: E402
-from src.corpus import CircuitCorpus, create_small_corpus, create_standard_corpus  # noqa: E402
+from src.corpus import CircuitCorpus, create_paper_corpus, create_small_corpus, create_standard_corpus  # noqa: E402
 from src.metrics import EndToEndResult, NoiseParams  # noqa: E402
 from src.pipeline import EndToEndPipeline, MockGateCompiler, create_real_pipeline  # noqa: E402
 from src.runner import BenchmarkRunner, ExperimentConfig, ExperimentResults  # noqa: E402
@@ -521,18 +521,38 @@ def main() -> None:
         action="store_true",
         help="Use real C++ optimizer and Lindblad pulse simulation (default: mock)",
     )
+    parser.add_argument(
+        "--paper",
+        action="store_true",
+        help="Use full 371-circuit paper corpus (default: standard 19-circuit corpus)",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Custom output directory for results",
+    )
     args = parser.parse_args()
 
     # Setup
     setup_directories()
     pipeline = create_pipeline(use_real=args.real)
 
+    # Override output directory if specified
+    global RESULTS_DIR
+    if args.output:
+        RESULTS_DIR = Path(args.output)
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
     # Create corpus
     if args.quick:
         logger.info("Using small corpus for quick testing")
         corpus = create_small_corpus()
+    elif args.paper:
+        logger.info("Using full 371-circuit paper corpus")
+        corpus = create_paper_corpus()
     else:
-        logger.info("Using standard corpus")
+        logger.info("Using standard corpus (19 circuits)")
         corpus = create_standard_corpus()
 
     logger.info(f"Corpus: {corpus.summary()}")

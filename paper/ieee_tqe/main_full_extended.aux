@@ -1,0 +1,106 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{preskill2018quantum}
+\citation{nam2018automated,kissinger2020reducing,lubasch2025tensor}
+\citation{shi2019optimized}
+\citation{iqm2024garnet}
+\citation{nam2018automated}
+\citation{kissinger2020reducing}
+\citation{lubasch2025tensor}
+\citation{qiskit2024}
+\citation{cirq2024}
+\citation{tket2020}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{II}{1}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Gate-Level Circuit Optimization}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Quantum Compilation Frameworks}{1}{subsection.2.2}\protected@file@percent }
+\citation{shi2019optimized}
+\citation{li2019tackling}
+\citation{cowtan2019qubit}
+\citation{motzoi2009simple}
+\citation{lindblad1976generators}
+\citation{iqm2024garnet}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Pulse-Level Optimization}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Hardware-Aware Compilation}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Background}{2}{section.3}\protected@file@percent }
+\newlabel{sec:background}{{III}{2}{Background}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Circuit Optimization Passes}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Pulse-Level Compilation}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:lindblad}{{1}{2}{Pulse-Level Compilation}{equation.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces IQM Garnet hardware parameters (median values).}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:hardware}{{I}{2}{IQM Garnet hardware parameters (median values)}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces End-to-end pipeline architecture. Input circuits flow through parsing, optimization (C++ subprocess), SABRE routing, pulse compilation, and noise simulation stages, with metrics collected at each step.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{2}{End-to-end pipeline architecture. Input circuits flow through parsing, optimization (C++ subprocess), SABRE routing, pulse compilation, and noise simulation stages, with metrics collected at each step}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}IQM Garnet Architecture}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}System Architecture}{2}{section.4}\protected@file@percent }
+\newlabel{sec:architecture}{{IV}{2}{System Architecture}{section.4}{}}
+\citation{li2019tackling}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Integration Design}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}C++ Optimizer Implementation}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Methodology}{3}{section.5}\protected@file@percent }
+\newlabel{sec:methodology}{{V}{3}{Methodology}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Circuit Corpus}{3}{subsection.5.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces End-to-End Fidelity Analysis Pipeline}}{3}{algorithm.1}\protected@file@percent }
+\newlabel{alg:pipeline}{{1}{3}{C++ Optimizer Implementation}{algorithm.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Circuit corpus summary.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:corpus}{{II}{3}{Circuit corpus summary}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Experimental Campaign}{3}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Summary statistics for the experimental campaign.}}{4}{table.3}\protected@file@percent }
+\newlabel{tab:summary}{{III}{4}{Summary statistics for the experimental campaign}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Fidelity Metrics}{4}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Simulation Results}{4}{section.6}\protected@file@percent }
+\newlabel{sec:results}{{VI}{4}{Simulation Results}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Overall Performance}{4}{subsection.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Optimization pass effectiveness measured by net gate reduction. Error bars indicate standard deviation across the circuit corpus.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:pass}{{2}{4}{Optimization pass effectiveness measured by net gate reduction. Error bars indicate standard deviation across the circuit corpus}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Per-pass effectiveness metrics.}}{4}{table.4}\protected@file@percent }
+\newlabel{tab:passes}{{IV}{4}{Per-pass effectiveness metrics}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Pass Effectiveness}{4}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Fidelity Waterfall}{4}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Scaling Analysis}{4}{subsection.6.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Waterfall diagram showing fidelity contributions from each pipeline stage. Two-qubit gate errors dominate the fidelity budget.}}{5}{figure.3}\protected@file@percent }
+\newlabel{fig:waterfall}{{3}{5}{Waterfall diagram showing fidelity contributions from each pipeline stage. Two-qubit gate errors dominate the fidelity budget}{figure.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Correlation of circuit parameters with process fidelity.}}{5}{table.5}\protected@file@percent }
+\newlabel{tab:scaling}{{V}{5}{Correlation of circuit parameters with process fidelity}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Noise Sensitivity Analysis}{5}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Hardware Validation}{5}{section.7}\protected@file@percent }
+\newlabel{sec:hardware}{{VII}{5}{Hardware Validation}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Hardware Execution Setup}{5}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Process fidelity versus qubit count, grouped by circuit type. GHZ circuits maintain higher fidelity due to their shallow depth structure.}}{5}{figure.4}\protected@file@percent }
+\newlabel{fig:scaling}{{4}{5}{Process fidelity versus qubit count, grouped by circuit type. GHZ circuits maintain higher fidelity due to their shallow depth structure}{figure.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Optimization benefit by noise regime.}}{5}{table.6}\protected@file@percent }
+\newlabel{tab:noise}{{VI}{5}{Optimization benefit by noise regime}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Results}{5}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Analysis}{5}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Discussion}{5}{section.8}\protected@file@percent }
+\newlabel{sec:discussion}{{VIII}{5}{Discussion}{section.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Implications for Compiler Design}{5}{subsection.8.1}\protected@file@percent }
+\citation{nam2018automated,kissinger2020reducing}
+\citation{shi2019optimized}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Hardware fidelity measurements on IQM Resonance Garnet.}}{6}{table.7}\protected@file@percent }
+\newlabel{tab:hw_results}{{VII}{6}{Hardware fidelity measurements on IQM Resonance Garnet}{table.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Hardware validation on IQM Garnet. Left: Fidelity comparison. Right: Gate reduction achieved. GHZ circuits are already optimal (0\% reduction), while QFT achieves 70\% gate reduction.}}{6}{figure.5}\protected@file@percent }
+\newlabel{fig:hw}{{5}{6}{Hardware validation on IQM Garnet. Left: Fidelity comparison. Right: Gate reduction achieved. GHZ circuits are already optimal (0\% reduction), while QFT achieves 70\% gate reduction}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Comparison with Prior Work}{6}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Limitations}{6}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-D}}Computational Requirements}{6}{subsection.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion}{6}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{IX}{6}{Conclusion}{section.9}{}}
+\bibcite{preskill2018quantum}{1}
+\bibcite{nam2018automated}{2}
+\bibcite{kissinger2020reducing}{3}
+\bibcite{lubasch2025tensor}{4}
+\bibcite{shi2019optimized}{5}
+\bibcite{lindblad1976generators}{6}
+\bibcite{iqm2024garnet}{7}
+\bibcite{li2019tackling}{8}
+\bibcite{motzoi2009simple}{9}
+\bibcite{cowtan2019qubit}{10}
+\bibcite{qiskit2024}{11}
+\bibcite{cirq2024}{12}
+\bibcite{tket2020}{13}
+\@writefile{toc}{\contentsline {section}{References}{7}{section*.3}\protected@file@percent }
+\gdef \@abspage@last{7}

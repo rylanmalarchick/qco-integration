@@ -755,7 +755,7 @@ def create_real_pipeline(
     else:
         # Path to real C++ optimizer
         optimizer_path = Path(
-            "/home/rylan/Documents/career/code_bases/research/compilers/"
+            "/home/rylan/dev/research/"
             "quantum-circuit-optimizer/build/quantum_circuit_optimizer"
         )
         if not optimizer_path.exists():

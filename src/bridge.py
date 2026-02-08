@@ -90,7 +90,7 @@ class CircuitOptimizerBridge:
             raise FileNotFoundError(
                 f"Optimizer binary not found: {self.binary_path}\n"
                 f"Expected location from PROJECT_CONTEXT.md: "
-                f"/home/rylan/Documents/career/code_bases/quantum/compilers/"
+                f"/home/rylan/dev/research/"
                 f"quantum-circuit-optimizer/build/quantum_circuit_optimizer"
             )
         if not self.binary_path.is_file():

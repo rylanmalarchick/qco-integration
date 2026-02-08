@@ -453,7 +453,7 @@ class TestCircuitOptimizerBridgeIntegration:
 
         path = os.environ.get(
             "QCO_OPTIMIZER_BINARY",
-            "/home/rylan/Documents/career/code_bases/quantum/compilers/"
+            "/home/rylan/dev/research/"
             "quantum-circuit-optimizer/build/quantum_circuit_optimizer",
         )
         binary = Path(path)

@@ -78,7 +78,7 @@
 %==============================================================================
 
 \begin{abstract}
-We present a comprehensive analysis of quantum circuit fidelity across the full compilation stack, from high-level gate optimization through pulse-level control. We connect a C++ circuit optimizer to a per-gate Lindblad master-equation fidelity model whose decoherence channels are cross-validated against \texttt{qiskit-dynamics} and whose absolute predictions are benchmarked against execution on real hardware. Across a campaign of 4{,}452 experiment runs over 371 benchmark circuits, gate cancellation provides the dominant improvement ($d = 1.66$, 72\% of circuits improved), while circuit size and pulse duration are the strongest negative predictors of process fidelity (input gates $r = -0.78$; pulse duration $r = -0.73$, $R^2 = 0.53$). A formal ablation study shows that pass ordering has no significant effect on two-qubit gate reduction (Kruskal--Wallis $p = 0.302$). Comparing against Qiskit transpilation levels, we show that two-qubit gate count---not total gate count---is the hardware-relevant metric: our optimizer attains superior two-qubit reduction on structured circuits (87.8\% on QFT, 100\% on QAOA) whereas Qiskit's larger total-gate reduction is dominated by single-qubit ($u_3$) consolidation. Finally, executing eight circuits on the IQM Resonance Garnet processor (8/8 jobs completed, job identifiers released) reveals that the model is a consistent upper bound: it preserves the relative difficulty ordering of circuits but overestimates absolute fidelity by a mean of 0.49, quantifying the error budget (crosstalk, leakage, readout) outside a $T_1$/$T_2$/depolarizing model. Our open-source framework enables reproducible, physically grounded benchmarking of quantum compilation pipelines.
+We present an analysis of quantum circuit fidelity across the full compilation stack, from high-level gate optimization through pulse-level control. We connect a C++ circuit optimizer to a per-gate Lindblad master-equation fidelity model whose decoherence channels are cross-validated against \texttt{qiskit-dynamics} and whose absolute predictions are benchmarked against execution on real hardware. Across a campaign of 4{,}452 experiment runs over 371 benchmark circuits, gate cancellation provides the dominant improvement ($d = 1.66$, 72\% of circuits improved), while circuit size and pulse duration are the strongest negative predictors of process fidelity (input gates $r = -0.78$; pulse duration $r = -0.73$, $R^2 = 0.53$). A formal ablation study shows that pass ordering has no significant effect on two-qubit gate reduction (Kruskal--Wallis $p = 0.302$). Comparing against Qiskit transpilation levels, we show that two-qubit gate count, not total gate count, is the hardware-relevant metric: our optimizer attains superior two-qubit reduction on structured circuits (87.8\% on QFT, 100\% on QAOA) whereas Qiskit's larger total-gate reduction is dominated by single-qubit ($u_3$) consolidation. Finally, executing eight circuits on the IQM Resonance Garnet processor (8/8 jobs completed, job identifiers released) reveals that the model is a consistent upper bound: it preserves the relative difficulty ordering of circuits but overestimates absolute fidelity by a mean of 0.49, quantifying the error budget (crosstalk, leakage, readout) outside a $T_1$/$T_2$/depolarizing model. We release the framework, data, and scripts as open source.
 \end{abstract}
 
 \maketitle
@@ -97,7 +97,7 @@ Comparisons between quantum compilers also tend to report total gate counts, whi
 In this work, we present \texttt{qco-integration}, an end-to-end framework for analyzing quantum circuit fidelity across the full compilation stack. The framework connects a high-performance C++ circuit optimizer to a per-gate Lindblad fidelity model, enabling systematic evaluation of how gate-level transformations affect physical fidelity, and we benchmark the model's predictions against execution on real hardware.
 
 Our contributions include:
-\begin{itemize}
+\begin{enumerate}
     \item A modular integration architecture connecting C++ circuit optimization with a Python fidelity model via subprocess communication;
     \item A per-gate Lindblad fidelity model (relaxation, dephasing, and a calibrated depolarizing channel, with optional non-Markovian $1/f$ dephasing) whose dynamics are cross-validated against \texttt{qiskit-dynamics} and which scales linearly in gate count;
     \item Systematic evaluation of four optimization passes on 371 benchmark circuits across 4{,}452 experiment runs, including a formal ablation study with individual, leave-one-out, and ordering analyses;
@@ -105,9 +105,9 @@ Our contributions include:
     \item Fidelity-scaling analysis identifying circuit size and pulse duration as the strongest negative predictors ($r = -0.78$ and $r = -0.73$);
     \item A provenanced hardware benchmark on IQM Resonance Garnet (8/8 jobs, identifiers released) that quantifies a consistent model-versus-hardware optimism gap (mean 0.49);
     \item Open-source tools for reproducible quantum compilation benchmarking.
-\end{itemize}
+\end{enumerate}
 
-We target the IQM Garnet 20-qubit processor~\cite{iqm2024garnet}, using experimentally validated noise parameters to ensure realistic fidelity estimates. The combination of comprehensive simulation with real hardware validation provides actionable guidance for quantum compiler design in the NISQ era.
+We target the IQM Garnet 20-qubit processor~\cite{iqm2024garnet}, using experimentally validated noise parameters to ensure realistic fidelity estimates. The combination of simulation with real hardware validation gives concrete guidance for quantum compiler design in the NISQ era.
 
 %==============================================================================
 \section{Related Work}
@@ -128,7 +128,7 @@ The OpenQASM 3 specification~\cite{cross2022openqasm3} provides a standardized i
 
 \subsection{Pulse-Level Optimization}
 
-Shi et al.~\cite{shi2019optimized} demonstrated that pulse-level compilation can achieve significant improvements over gate-level approaches by exploiting the continuous nature of quantum control. Motzoi et al.~\cite{motzoi2009simple} introduced DRAG pulses that suppress leakage to non-computational states, which we use in our pulse compilation model. Khaneja et al.~\cite{khaneja2005optimal} developed the GRAPE algorithm for optimal control of coupled spin dynamics, and Koch et al.~\cite{koch2022quantum} provide a comprehensive review of quantum optimal control methods. Gokhale et al.~\cite{gokhale2020partial} explored partial compilation of variational algorithms at the pulse level, while Younis et al.~\cite{younis2021qfast} developed synthesis-based approaches in QFAST. Our work extends these directions by connecting gate-level optimization decisions to their pulse-level consequences, enabling co-analysis across the full stack.
+Shi et al.~\cite{shi2019optimized} demonstrated that pulse-level compilation can achieve significant improvements over gate-level approaches by exploiting the continuous nature of quantum control. Motzoi et al.~\cite{motzoi2009simple} introduced DRAG pulses that suppress leakage to non-computational states, which we use in our pulse compilation model. Khaneja et al.~\cite{khaneja2005optimal} developed the GRAPE algorithm for optimal control of coupled spin dynamics, and Koch et al.~\cite{koch2022quantum} provide a review of quantum optimal control methods. Gokhale et al.~\cite{gokhale2020partial} explored partial compilation of variational algorithms at the pulse level, while Younis et al.~\cite{younis2021qfast} developed synthesis-based approaches in QFAST. Our work extends these directions by connecting gate-level optimization decisions to their pulse-level consequences, enabling co-analysis across the full stack.
 
 \subsection{Hardware-Aware Compilation}
 
@@ -162,7 +162,7 @@ We model decoherence with the Lindblad (Gorini--Kossakowski--Sudarshan--Lindblad
 \end{equation}
 where $\ham$ is the gate's generating Hamiltonian, $L_k$ are collapse operators for the decoherence channels, and $\gamma_k$ are rates derived from $T_1$ and $T_2$. For superconducting transmons~\cite{koch2007transmon} the channels are energy relaxation ($L_1 = \sqrt{1/T_1}\,\sigma_-$) and pure dephasing ($L_\phi = \sqrt{\gamma_\phi/2}\,\sigma_z$ with $\gamma_\phi = 1/T_2 - 1/(2T_1)$).
 
-Rather than integrating Equation~\ref{eq:lindblad} over an entire $2^n$-dimensional circuit---which is intractable beyond a handful of qubits---we evaluate it \emph{per gate} on the gate's one- or two-qubit subspace. Each gate is assigned a constant generator $\ham = i\log(U)/\tau$ acting for its calibrated duration $\tau$ while the collapse operators act concurrently; we exponentiate the resulting time-independent Liouvillian to obtain the gate's noisy channel, compose it with a depolarizing channel calibrated to the device's average gate-error rate, and compute the gate's entanglement and average gate fidelity from the channel's Choi state. Circuit fidelity is the product of per-gate fidelities, with idle qubits accruing additional dephasing over the gaps in an as-soon-as-possible schedule. This makes the model linear in gate count and applicable to the full corpus (up to 20 qubits); it is an approximation that omits inter-gate correlations, crosstalk, and leakage, a limitation we quantify directly against hardware in Section~\ref{sec:hardware}. We verify the per-gate channel against an independent \texttt{qiskit-dynamics} integration of Equation~\ref{eq:lindblad} (agreement to $<10^{-7}$) and against \texttt{qiskit}'s average-gate-fidelity routine, so that the model's reported numbers reflect the master equation rather than a heuristic.
+Rather than integrating Equation~\ref{eq:lindblad} over an entire $2^n$-dimensional circuit, which is intractable beyond a handful of qubits, we evaluate it \emph{per gate} on the gate's one- or two-qubit subspace. Each gate is assigned a constant generator $\ham = i\log(U)/\tau$ acting for its calibrated duration $\tau$ while the collapse operators act concurrently; we exponentiate the resulting time-independent Liouvillian to obtain the gate's noisy channel, compose it with a depolarizing channel calibrated to the device's average gate-error rate, and compute the gate's entanglement and average gate fidelity from the channel's Choi state. Circuit fidelity is the product of per-gate fidelities, with idle qubits accruing additional dephasing over the gaps in an as-soon-as-possible schedule. This makes the model linear in gate count and applicable to the full corpus (up to 20 qubits); it is an approximation that omits inter-gate correlations, crosstalk, and leakage, a limitation we quantify directly against hardware in Section~\ref{sec:hardware}. We verify the per-gate channel against an independent \texttt{qiskit-dynamics} integration of Equation~\ref{eq:lindblad} (agreement to $<10^{-7}$) and against \texttt{qiskit}'s average-gate-fidelity routine, so that the model's reported numbers reflect the master equation rather than a heuristic.
 
 The fidelity of a circuit is thus determined by the interplay between the number of noisy gates and the total duration of pulse-level execution, during which decoherence continuously degrades the quantum state.
 
@@ -198,15 +198,7 @@ The relatively short $T_2$ time (\SI{9.6}{\micro\second}) compared to typical tr
 \label{sec:architecture}
 %==============================================================================
 
-Our framework comprises five pipeline stages, illustrated in Figure~\ref{fig:architecture}.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/architecture.pdf}
-    \caption{End-to-end pipeline architecture. Input circuits flow through parsing, optimization (C++ subprocess), SABRE routing, pulse compilation, and noise simulation stages, with metrics collected at each step.}
-    \label{fig:architecture}
-    \Description{Block diagram showing five pipeline stages: parse, optimize, route, pulse compile, and simulate, with arrows indicating data flow.}
-\end{figure}
+Our framework comprises five pipeline stages.
 
 \textbf{Stage 1: Parse and Validate.} Input circuits in OpenQASM 3.0 format~\cite{cross2022openqasm3} are parsed using a hand-written recursive descent parser implemented in C++. Initial metrics (gate count, depth, qubit count) are extracted. The parser validates circuit syntax and semantics before optimization.
 
@@ -221,10 +213,10 @@ Our framework comprises five pipeline stages, illustrated in Figure~\ref{fig:arc
 \subsection{Integration Design}
 
 The C++ optimizer and Python pulse tools communicate via OpenQASM 3.0 and JSON:
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Input:} OpenQASM circuit, pass configuration, topology specification.
     \item \textbf{Output:} Optimized QASM, per-pass metrics, routing statistics.
-\end{itemize}
+\end{enumerate}
 
 This decoupled design enables independent development and testing of each component while maintaining a unified experimental workflow. The C++ optimizer provides high performance for large circuits, while Python enables rapid prototyping of pulse-level analysis.
 
@@ -232,12 +224,12 @@ This decoupled design enables independent development and testing of each compon
 
 The \texttt{quantum-circuit-optimizer} is implemented in C++17 with a unit-test suite (GoogleTest). Key features include:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{DAG-based IR:} Circuits are represented as directed acyclic graphs with nodes representing gates and edges representing qubit and classical dependencies.
     \item \textbf{Pass manager:} LLVM-style pass manager~\cite{lattner2004llvm} enabling arbitrary pass sequences with per-pass metrics collection.
     \item \textbf{OpenQASM 3.0 parser:} Hand-written recursive descent parser supporting the full gate set, following the OpenQASM 3 specification~\cite{cross2022openqasm3}.
     \item \textbf{Topology support:} Linear, grid, and heavy-hex topologies with SABRE routing~\cite{li2019tackling}.
-\end{itemize}
+\end{enumerate}
 
 Algorithm~\ref{alg:pipeline} presents the end-to-end pipeline in pseudocode.
 
@@ -395,15 +387,7 @@ The cancellation pass accounts for essentially all of the gate reduction. Rotati
 
 \subsection{Fidelity Waterfall}
 
-Figure~\ref{fig:waterfall} illustrates the stage-by-stage fidelity breakdown. The dominant source of fidelity loss is two-qubit gate errors, followed by decoherence during pulse execution.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fidelity_waterfall.pdf}
-    \caption{Waterfall diagram showing fidelity contributions from each pipeline stage. Two-qubit gate errors dominate the fidelity budget, motivating optimizations that target CZ gate count.}
-    \label{fig:waterfall}
-    \Description{Waterfall chart showing stage-by-stage fidelity contributions, with two-qubit gate errors as the dominant source of fidelity loss.}
-\end{figure}
+The dominant source of fidelity loss is two-qubit gate errors, followed by decoherence during pulse execution.
 
 This finding has important implications: optimization strategies should prioritize reducing two-qubit gate count over single-qubit gates. A 10\% reduction in CZ gates provides more fidelity benefit than a 30\% reduction in PRX gates. This insight motivates our use of two-qubit gate reduction as the primary comparison metric in Section~\ref{sec:compiler}.
 
@@ -428,17 +412,9 @@ Input qubits & $-0.623$ & 0.388 \\
 \end{tabular}
 \end{table}
 
-Circuit size and pulse duration are the strongest predictors of fidelity (input gates $R^2 = 0.61$; pulse duration $R^2 = 0.53$), and the two are closely related: each native gate contributes a fixed pulse interval, so total gate count and execution time co-vary. The negative correlation is physically expected---longer sequences expose the state to decoherence for longer, with dephasing contributing a factor $\approx \exp(-t/T_2)$~\cite{krantz2019quantum}---but note that, unlike a model in which fidelity is a closed-form function of duration alone, here fidelity depends on the per-gate channels and the schedule, so the correlation is an empirical outcome of the simulation rather than a built-in identity. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, reducing total circuit time, through both gate-count reduction and parallelism, is a primary optimization objective for NISQ applications.
+Circuit size and pulse duration are the strongest predictors of fidelity (input gates $R^2 = 0.61$; pulse duration $R^2 = 0.53$), and the two are closely related: each native gate contributes a fixed pulse interval, so total gate count and execution time co-vary. The negative correlation is physically expected (longer sequences expose the state to decoherence for longer, with dephasing contributing a factor $\approx \exp(-t/T_2)$~\cite{krantz2019quantum}), but note that, unlike a model in which fidelity is a closed-form function of duration alone, here fidelity depends on the per-gate channels and the schedule, so the correlation is an empirical outcome of the simulation rather than a built-in identity. With $T_2 = \SI{9.6}{\micro\second}$ on IQM Garnet, reducing total circuit time, through both gate-count reduction and parallelism, is a primary optimization objective for NISQ applications.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/scaling_qubits.pdf}
-    \caption{Process fidelity versus qubit count, grouped by circuit type. GHZ circuits maintain higher fidelity due to their shallow depth structure, while random circuits degrade rapidly.}
-    \label{fig:scaling}
-    \Description{Scatter plot of process fidelity versus qubit count grouped by circuit type, showing GHZ circuits maintaining higher fidelity than random circuits.}
-\end{figure}
-
-Figure~\ref{fig:scaling} visualizes the relationship between qubit count and fidelity, revealing that circuit structure (depth) matters more than qubit count alone. GHZ circuits maintain relatively high fidelity even at larger qubit counts due to their linear depth, while random circuits degrade rapidly.
+Circuit structure (depth) matters more than qubit count alone: GHZ circuits maintain relatively high fidelity even at larger qubit counts due to their linear depth, while random circuits degrade rapidly.
 
 \subsection{Noise Sensitivity Analysis}
 
@@ -472,11 +448,11 @@ A critical question for quantum compiler design is how different optimization st
 \subsection{Experimental Setup}
 
 We compare seven compiler configurations:
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{QCO:} Our C++ optimizer with all four passes (cancel $\to$ commute $\to$ rotate $\to$ identity).
     \item \textbf{Qiskit-L0 through L3:} Qiskit transpiler at optimization levels 0--3, targeting Qiskit's default virtual basis gates ($u_3$, $cx$).
     \item \textbf{Qiskit-L1-IQM, L3-IQM:} Qiskit transpiler targeting IQM Garnet's native basis gates (PRX, CZ) with the Garnet coupling map.
-\end{itemize}
+\end{enumerate}
 
 For fair comparison, we report three metrics: total gate reduction, two-qubit gate reduction, and circuit depth reduction. We argue that \emph{two-qubit gate reduction} is the most hardware-relevant metric, as two-qubit gates dominate the error budget (Table~\ref{tab:hardware}: CZ error 0.6\% vs.\ PRX error 0.1\%, a $6\times$ difference).
 
@@ -530,24 +506,16 @@ Random & 3.2\% & 10.9\% & \textbf{16.0}\% \\
 \end{table}
 
 QCO dominates on \emph{structured} circuits:
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{QAOA:} QCO eliminates 100\% of two-qubit gates, compared to 1.5\% for Qiskit-L3. The cancellation pass identifies and removes all redundant CZ gates in the QAOA circuit structure, which consists of alternating layers of entangling and rotation gates where adjacent inverse pairs arise naturally.
     \item \textbf{QFT:} QCO eliminates 87.8\% of two-qubit gates, compared to 12.2\% for Qiskit-L3. The rotation merging and cancellation passes exploit the regular structure of controlled rotation sequences in the QFT.
     \item \textbf{GHZ:} All compilers correctly identify that GHZ circuits are already minimal (0\% reduction).
     \item \textbf{Random:} Qiskit-L3-IQM outperforms QCO (16.0\% vs.\ 3.2\%), as Qiskit's broader optimization passes (including KAK decomposition~\cite{vatan2004optimal} and template matching) find opportunities in unstructured circuits that our four passes miss.
-\end{itemize}
+\end{enumerate}
 
 \subsection{Head-to-Head Analysis}
 
-On a per-circuit basis for two-qubit gate reduction, Qiskit-L3-IQM wins on 188 circuits, QCO wins on 57, and 126 are tied. This reflects the corpus composition: 303 of 371 circuits are random, where Qiskit has an advantage. On the 68 structured circuits (GHZ, QFT, QAOA), QCO provides substantially better or equal two-qubit gate reduction. Figure~\ref{fig:compiler-2q} visualizes this breakdown by circuit type.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/compiler_comparison_2q.pdf}
-    \caption{Two-qubit gate reduction by circuit type and compiler. QCO achieves near-complete elimination of two-qubit gates on QAOA (100\%) and QFT (87.8\%) circuits, while Qiskit performs better on random circuits.}
-    \label{fig:compiler-2q}
-    \Description{Grouped bar chart comparing two-qubit gate reduction percentages across circuit types for QCO and Qiskit compiler configurations.}
-\end{figure}
+On a per-circuit basis for two-qubit gate reduction, Qiskit-L3-IQM wins on 188 circuits, QCO wins on 57, and 126 are tied. This reflects the corpus composition: 303 of 371 circuits are random, where Qiskit has an advantage. On the 68 structured circuits (GHZ, QFT, QAOA), QCO provides substantially better or equal two-qubit gate reduction.
 
 \subsection{Implications}
 
@@ -605,15 +573,7 @@ w/o cancel & 0.0\% & 0.0\% & 0.524 & 9.1\% & 1.66 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/ablation_leave_one_out.pdf}
-    \caption{Leave-one-out ablation results. Removing the cancellation pass eliminates essentially all optimization benefit (9.1\% marginal contribution, $d = 1.66$).}
-    \label{fig:ablation-loo}
-    \Description{Bar chart showing leave-one-out ablation results with the cancellation pass removal causing the largest performance drop.}
-\end{figure}
-
-Removing the cancellation pass eliminates essentially all optimization benefit (marginal contribution 9.1\%, $d = 1.66$, large effect), as shown in Figure~\ref{fig:ablation-loo}. Removing rotation merging, commutation, or identity elimination has negligible impact ($d < 0.02$), confirming that cancellation carries the pipeline.
+Removing the cancellation pass eliminates essentially all optimization benefit (marginal contribution 9.1\%, $d = 1.66$, large effect). Removing rotation merging, commutation, or identity elimination has negligible impact ($d < 0.02$), confirming that cancellation carries the pipeline.
 
 A notable finding is that \emph{two-qubit gate reduction is invariant to pass composition}: all four leave-one-out configurations achieve 17.7\% two-qubit gate reduction except the configuration without cancellation (0.0\%). This indicates that the cancellation pass is solely responsible for all two-qubit gate elimination.
 
@@ -657,19 +617,19 @@ To test how far our simulation model tracks reality, we executed a representativ
 \subsection{Hardware Execution Setup}
 
 We submitted eight circuits to IQM Resonance Garnet, each completed as a distinct device job (job identifiers recorded with the released data for reproducibility):
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Device:} IQM Resonance Garnet (20 superconducting transmon qubits), accessed \texttt{2026-06-01}.
     \item \textbf{Circuits:} GHZ (4, 8 qubits), QFT (4, 8 qubits), QAOA (4, 8 qubits), and random circuits (4 qubits, depth 5 and 10).
     \item \textbf{Shots per circuit:} 10{,}000.
     \item \textbf{Server-side transpilation:} \texttt{iqm-client} to the native PRX/CZ basis on the Garnet coupling map.
     \item \textbf{Jobs completed:} 8/8.
-\end{itemize}
+\end{enumerate}
 
 Fidelity is estimated from measurement counts as the empirical probability of the dominant expected outcome; this is a coarse proxy that upper-bounds true state fidelity, and we use it identically for hardware and simulation so the comparison is internally consistent.
 
 \subsection{Results}
 
-Table~\ref{tab:hw-results} reports, for each circuit, the measured hardware fidelity alongside the validated Lindblad model's prediction. Figure~\ref{fig:hw-gap} visualizes the comparison.
+Table~\ref{tab:hw-results} reports, for each circuit, the measured hardware fidelity alongside the validated Lindblad model's prediction. Every measured value falls below the prediction, so the model is a consistent upper bound, though it preserves the relative ordering of circuits by difficulty.
 
 \begin{table}[t]
 \centering
@@ -693,14 +653,6 @@ rand\_4q\,(d10) & 0.069 & 0.853 & 0.784 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.85\columnwidth]{figures/fig_hardware_gap.pdf}
-    \caption{Measured hardware fidelity versus the model prediction. All points lie below the $y=x$ line (the model is optimistic), but the strong rank correlation shows the model preserves the relative difficulty ordering of circuits.}
-    \label{fig:hw-gap}
-    \Description{Scatter plot of measured versus simulated fidelity with a y equals x reference line; all points fall below the line.}
-\end{figure}
-
 \subsection{Analysis}
 
 The hardware run supports a deliberately limited set of claims:
@@ -722,7 +674,7 @@ We explicitly do \emph{not} claim that hardware execution validates the simulati
 
 The results point to several practical takeaways for quantum compiler design:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Prioritize cancellation.} Gate cancellation should be applied early. It provides the largest fidelity gains with minimal computational cost ($d = 1.66$). The ablation study confirms that removing the cancellation pass eliminates essentially all optimization benefit.
 
     \item \textbf{Target two-qubit gates.} The fidelity waterfall analysis shows that two-qubit gates dominate the error budget. Compiler comparisons should report two-qubit gate counts, not just total gates. Qiskit's 47.7\% total gate reduction translates to only 9.3\% two-qubit gate reduction.
@@ -732,17 +684,17 @@ The results point to several practical takeaways for quantum compiler design:
     \item \textbf{Do not over-engineer pass ordering.} The ordering analysis ($p = 0.302$) shows that these four passes can be applied in any order without significant performance difference. This simplifies compiler development and maintenance.
 
     \item \textbf{Use domain-specific strategies.} QCO outperforms Qiskit on structured circuits (QAOA: 100\% vs.\ 1.5\% two-qubit gate reduction), while Qiskit outperforms on random circuits (16.0\% vs.\ 3.2\%). Production compilers should incorporate both general and domain-specific passes.
-\end{itemize}
+\end{enumerate}
 
 \subsection{Physical Interpretation of the Pulse Duration Correlation}
 
-The correlation $r = -0.73$ between pulse duration and process fidelity has a straightforward physical explanation. In the Lindblad framework (Equation~\ref{eq:lindblad}), the decoherence channels act continuously during pulse execution. For a circuit with total pulse duration $t_{\text{total}}$, the fidelity loss due to dephasing alone scales as:
+The correlation $r = -0.73$ between pulse duration and process fidelity has a direct physical explanation. In the Lindblad framework (Equation~\ref{eq:lindblad}), the decoherence channels act continuously during pulse execution. For a circuit with total pulse duration $t_{\text{total}}$, the fidelity loss due to dephasing alone scales as:
 \begin{equation}
     \fid_{\text{dephasing}} \approx \exp\left(-\frac{t_{\text{total}}}{T_2}\right)
     \label{eq:dephasing}
 \end{equation}
 
-With IQM Garnet's $T_2 = \SI{9.6}{\micro\second}$, a circuit requiring $\SI{1}{\micro\second}$ of total execution time loses roughly 10\% of its fidelity to dephasing alone, while a circuit requiring $\SI{5}{\micro\second}$ loses roughly 41\%. The remaining variance ($1 - R^2 = 0.47$) comes from gate errors, the per-circuit schedule and idle structure, routing overhead, and circuit-specific factors like the degree of entanglement---which is why pulse duration alone does not fully determine fidelity in this model.
+With IQM Garnet's $T_2 = \SI{9.6}{\micro\second}$, a circuit requiring $\SI{1}{\micro\second}$ of total execution time loses roughly 10\% of its fidelity to dephasing alone, while a circuit requiring $\SI{5}{\micro\second}$ loses roughly 41\%. The remaining variance ($1 - R^2 = 0.47$) comes from gate errors, the per-circuit schedule and idle structure, routing overhead, and circuit-specific factors like the degree of entanglement, which is why pulse duration alone does not fully determine fidelity in this model.
 
 This explains why two-qubit gate reduction matters more than single-qubit gate reduction. CZ gates have twice the duration (\SI{40}{\nano\second} vs.\ \SI{20}{\nano\second}) and $6\times$ the error rate compared to PRX gates. Each eliminated CZ gate reduces both the error contribution and the decoherence exposure time.
 
@@ -758,37 +710,33 @@ The gate-reduction rates we observe (mean 9.1\%, max 40.0\% under the routed, id
 
 Several limitations apply:
 
-\begin{itemize}
+\begin{enumerate}
     \item The fidelity model solves the Lindblad equation \emph{per gate} on one- and two-qubit subspaces and composes the results, rather than integrating the full $2^n$ circuit dynamics. This makes it scalable but approximate: it omits inter-gate coherent correlations, crosstalk, and leakage. The hardware benchmark (Section~\ref{sec:hardware}) measures the size of this approximation directly (mean optimism gap 0.49).
     \item Hardware measurements come from a single execution session (eight circuits, 10{,}000 shots each); device calibration varies over time, and fidelity is estimated from a dominant-outcome count proxy rather than full state tomography.
-    \item The hardware subset (eight circuits) is smaller than the simulation campaign (371 circuits) due to access constraints, and was chosen to span circuit families rather than to isolate the optimization effect at fixed circuit structure.
-    \item Hardware results are from a single execution session. Device calibration varies over time.
-    \item We focus exclusively on IQM processor topologies and the PRX/CZ gate set.
+    \item The hardware subset (eight circuits) is smaller than the simulation campaign (371 circuits) due to access constraints, and was chosen to span circuit families rather than to isolate the optimization effect at fixed circuit structure.    \item We focus exclusively on IQM processor topologies and the PRX/CZ gate set.
     \item The optimizer implements four specific passes. Additional passes (e.g., template matching, ZX-calculus rewriting) could improve performance on unstructured circuits.
     \item The compiler comparison uses Qiskit only. Comparison against Cirq and t$|$ket$\rangle$ would strengthen generality claims.
-\end{itemize}
-
-Future work should expand hardware validation to more circuits, validate on additional platforms (IBM, Google, Rigetti), and incorporate additional optimization passes targeting unstructured circuits.
+\end{enumerate}
 
 \subsection{Reproducibility}
 \label{sec:reproducibility}
 
 All software, data, and scripts used in this work are publicly available:
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Integration framework:} \url{https://github.com/rylanmalarchick/qco-integration}
     \item \textbf{C++ optimizer:} \url{https://github.com/rylanmalarchick/quantum-circuit-optimizer}
-\end{itemize}
+\end{enumerate}
 
 \noindent The integration framework repository contains:
 
-\begin{itemize}
+\begin{enumerate}
     \item A Python package (\texttt{src/}) implementing the five-stage pipeline with configurable passes, routing, and noise simulation.
-    \item An experiment runner (\texttt{experiments/\allowbreak run\_campaign.py}) that reproduces all eight experiment types with a single command.
-    \item Statistical analysis scripts (\texttt{experiments/\allowbreak statistical\_analysis.py}) that generate all tables and figures from raw results.
-    \item A benchmark compiler comparison script (\texttt{experiments/\allowbreak benchmark\_compilers.py}) for reproducing the Qiskit comparison.
+    \item An experiment runner (\texttt{experiments/\allowbreak run\_\allowbreak campaign.py}) that reproduces all eight experiment types with a single command.
+    \item Statistical analysis scripts (\texttt{experiments/\allowbreak statistical\_\allowbreak analysis.py}) that generate all tables and figures from raw results.
+    \item A benchmark compiler comparison script (\texttt{experiments/\allowbreak benchmark\_\allowbreak compilers.py}) for reproducing the Qiskit comparison.
     \item The C++ optimizer source code (\texttt{quantum-circuit-optimizer/}) with its GoogleTest unit-test suite.
     \item 252 Python integration tests validating the pipeline end-to-end.
-\end{itemize}
+\end{enumerate}
 
 The full experiment campaign can be reproduced by building the C++ optimizer and running:
 \begin{verbatim}
@@ -820,9 +768,9 @@ We have presented \texttt{qco-integration}, a framework for end-to-end fidelity 
     \item The per-gate Lindblad model, cross-validated against \texttt{qiskit-dynamics}, is a scalable upper bound on hardware fidelity: an eight-circuit benchmark on IQM Garnet (8/8 jobs completed) shows it preserves the relative difficulty ordering of circuits while overestimating absolute fidelity by a mean of 0.49, quantifying the crosstalk/leakage/readout error budget it omits.
 \end{enumerate}
 
-The practical takeaway for quantum compiler developers is straightforward: implement gate cancellation first, because it provides nearly all the value. Report two-qubit gate counts for fair comparison, not total gates. And do not over-engineer pass ordering. The open-source framework enables reproducible benchmarking of quantum compilation pipelines with hardware validation capabilities.
+The practical guidance is short: apply gate cancellation first, since it carries nearly all of the benefit; report two-qubit gate counts rather than total gate counts when comparing compilers; and do not spend effort tuning pass order.
 
-Future work will expand hardware validation to additional platforms, integrate machine learning for adaptive pass selection, incorporate additional optimization passes for unstructured circuits, and extend the framework to fault-tolerant compilation pipelines.
+The most useful extensions are more hardware sessions across additional devices and platforms, and optimization passes aimed at unstructured circuits, where a cancellation-dominated pipeline leaves the most unrealized.
 
 \begin{acks}
 Hardware access was provided by IQM Resonance (free tier). The author thanks Embry-Riddle Aeronautical University for research support.

@@ -8,14 +8,12 @@ This script combines:
 3. Projected hardware improvements
 4. Full report for publication
 """
-from pathlib import Path
+import json
+import logging
 import os
 import sys
-import json
-import time
-import logging
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from pathlib import Path
 
 # Load .env
 env_path = Path(__file__).parent.parent / ".env"
@@ -30,8 +28,8 @@ if env_path.exists():
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.corpus import create_standard_corpus
 from src.bridge import CircuitOptimizerBridge
+from src.corpus import create_standard_corpus
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -42,18 +40,18 @@ def main():
     print("Real QPU Data + Optimization Analysis")
     print("=" * 80)
     print()
-    
+
     # Setup
     corpus = create_standard_corpus()
     circuits_list = [c for c in corpus if c.spec.num_qubits <= 12][:4]
-    
+
     optimizer_binary = (
         Path.home()
         / "dev/research/quantum-circuit-optimizer/build/quantum_circuit_optimizer"
     )
     optimizer = CircuitOptimizerBridge(str(optimizer_binary))
     passes = ["cancel", "commute", "rotate"]
-    
+
     report = {
         "title": "Quantum Circuit Optimizer Validation on Real Hardware",
         "timestamp": datetime.now().isoformat(),
@@ -68,33 +66,33 @@ def main():
         "circuits": [],
         "key_findings": []
     }
-    
+
     print(f"Analyzing {len(circuits_list)} circuits...\n")
-    
+
     for i, circuit in enumerate(circuits_list, 1):
         name = circuit.spec.name
         qubits = circuit.spec.num_qubits
         circuit_type = circuit.spec.circuit_type.value
-        
+
         print(f"Circuit {i}: {name} ({qubits}Q, {circuit_type})")
-        
+
         try:
             # Get original metrics
             orig_qasm = circuit.qasm
-            print(f"  Optimizing...")
+            print("  Optimizing...")
             opt_result = optimizer.optimize(orig_qasm, name, passes)
-            
+
             orig_metrics = opt_result.input_metrics
             opt_metrics = opt_result.post_optimization
-            
+
             gate_reduction = 100 * (1 - opt_metrics.gates / orig_metrics.gates)
             depth_reduction = 100 * (1 - opt_metrics.depth / orig_metrics.depth)
             two_q_reduction = 100 * (1 - opt_metrics.two_qubit_gates / max(1, orig_metrics.two_qubit_gates))
-            
+
             print(f"    Gates: {orig_metrics.gates} → {opt_metrics.gates} ({gate_reduction:+.1f}%)")
             print(f"    Depth: {orig_metrics.depth} → {opt_metrics.depth} ({depth_reduction:+.1f}%)")
             print(f"    2Q Gates: {orig_metrics.two_qubit_gates} → {opt_metrics.two_qubit_gates} ({two_q_reduction:+.1f}%)")
-            
+
             circuit_data = {
                 "name": name,
                 "type": circuit_type,
@@ -116,7 +114,7 @@ def main():
                 },
                 "expected_fidelity_improvement": "Pending real hardware execution"
             }
-            
+
             # Mark first circuit with actual data
             if i == 1:
                 circuit_data["actual_hardware_data"] = {
@@ -126,34 +124,34 @@ def main():
                     "fidelity_original": 0.8938,  # from our execution
                     "note": "GHZ 4Q: 89% fidelity (143/160 shots in expected |0000> or |1111>)"
                 }
-            
+
             report["circuits"].append(circuit_data)
             print()
-            
+
         except Exception as e:
-            logger.error(f"  Error: {e}")
+            logger.exception(f"  Error: {e}")
             print()
-    
+
     # Key findings
     if report["circuits"]:
         avg_gate_reduction = sum(c["improvement"]["gate_reduction_percent"] for c in report["circuits"]) / len(report["circuits"])
         avg_depth_reduction = sum(c["improvement"]["depth_reduction_percent"] for c in report["circuits"]) / len(report["circuits"])
-        
+
         report["key_findings"] = [
             f"Average gate reduction across {len(report['circuits'])} circuits: {avg_gate_reduction:.1f}%",
             f"Average circuit depth reduction: {avg_depth_reduction:.1f}%",
-            f"Successfully executed first circuit on real IQM Garnet QPU: GHZ 4Q with 89% fidelity",
+            "Successfully executed first circuit on real IQM Garnet QPU: GHZ 4Q with 89% fidelity",
             "Optimizer demonstrates consistent circuit reduction without sacrificing correctness",
             f"Remaining credits ({report['summary']['credits_remaining']}): Can complete full optimization validation"
         ]
-    
+
     # Output report
     output_file = PROJECT_ROOT / "experiments" / "reports" / f"comprehensive_validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with output_file.open('w') as f:
         json.dump(report, f, indent=2)
-    
+
     print("=" * 80)
     print(f"Report saved to: {output_file}")
     print("=" * 80)

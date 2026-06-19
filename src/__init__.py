@@ -1,16 +1,19 @@
 """QCO-Integration: End-to-end quantum compilation fidelity analysis.
 
-This package provides an integration layer connecting quantum-circuit-optimizer
-(C++17) with QubitPulseOpt (Python) for analyzing fidelity from circuit
-optimization through pulse-level control.
+This package connects the quantum-circuit-optimizer (C++17) binary to a per-gate
+Lindblad fidelity model, analyzing fidelity from circuit optimization through
+pulse-level decoherence.
 
 Main components:
-- bridge: CircuitOptimizerBridge for calling C++ optimizer via subprocess
-- pipeline: EndToEndPipeline for orchestrating full compilation flow
+- bridge: CircuitOptimizerBridge for calling the C++ optimizer via subprocess
+- pipeline: EndToEndPipeline for orchestrating the full compilation flow
+- pulse: per-gate Lindblad fidelity model (relaxation, dephasing, depolarizing, idle)
+- noise_spectrum: non-Markovian 1/f filter-function dephasing
 - corpus: CircuitCorpus for benchmark circuit generation
-- metrics: Dataclasses for stage-by-stage metrics collection
+- metrics: dataclasses for stage-by-stage metrics collection
 - runner: BenchmarkRunner for automated experiment execution
-- visualization: Plotting utilities for publication-ready figures
+- hardware: IQMHardwareExecutor for IQM Resonance execution
+- visualization: plotting utilities for publication-ready figures
 
 Example:
     >>> from src import CircuitOptimizerBridge, EndToEndPipeline

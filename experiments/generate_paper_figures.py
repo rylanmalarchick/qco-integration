@@ -80,7 +80,7 @@ def fig_compiler_comparison_2q(data: dict) -> None:
                 vals.append(by_type[ctype][compiler]["mean_2q_reduction"])
             else:
                 vals.append(0.0)
-        bars = ax.bar(x + offsets[i] * width, vals, width * 0.9,
+        ax.bar(x + offsets[i] * width, vals, width * 0.9,
                       label=compiler, color=colors[i], edgecolor="white", linewidth=0.5)
 
     ax.set_xlabel("Circuit Type")
@@ -124,7 +124,7 @@ def fig_compiler_comparison_overall(data: dict) -> None:
         else:
             colors.append("#FF9800")
 
-    bars1 = ax1.bar(range(len(compilers)), gate_reds, yerr=gate_stds,
+    ax1.bar(range(len(compilers)), gate_reds, yerr=gate_stds,
                     color=colors, edgecolor="white", linewidth=0.5,
                     capsize=3, error_kw={"linewidth": 0.8})
     ax1.set_xticks(range(len(compilers)))
@@ -138,7 +138,7 @@ def fig_compiler_comparison_overall(data: dict) -> None:
     twoq_reds = [summary[c]["two_q_reduction_pct"]["mean"] for c in compilers]
     twoq_stds = [summary[c]["two_q_reduction_pct"]["std"] for c in compilers]
 
-    bars2 = ax2.bar(range(len(compilers)), twoq_reds, yerr=twoq_stds,
+    ax2.bar(range(len(compilers)), twoq_reds, yerr=twoq_stds,
                     color=colors, edgecolor="white", linewidth=0.5,
                     capsize=3, error_kw={"linewidth": 0.8})
     ax2.set_xticks(range(len(compilers)))
@@ -190,7 +190,7 @@ def fig_ablation_cumulative(ablation: dict) -> None:
     color_gate = "#2196F3"
     color_fid = "#FF5722"
 
-    bars = ax1.bar(x - 0.15, gate_reds, 0.3, label="Gate Reduction",
+    ax1.bar(x - 0.15, gate_reds, 0.3, label="Gate Reduction",
                    color=color_gate, edgecolor="white", linewidth=0.5)
     ax1.set_xlabel("Pass Configuration")
     ax1.set_ylabel("Gate Reduction (%)", color=color_gate)

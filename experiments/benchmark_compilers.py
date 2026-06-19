@@ -242,7 +242,7 @@ def run_benchmark(corpus: CircuitCorpus) -> list[CompilerResult]:
     Returns:
         List of CompilerResult for every (compiler, circuit) combination.
     """
-    from qiskit import transpile, qasm3  # noqa: F401 — warmup import
+    from qiskit import qasm3, transpile  # noqa: F401 — warmup import
 
     # Warmup Qiskit JIT (first transpile call is slow)
     logger.info("Warming up Qiskit transpiler...")
@@ -323,7 +323,7 @@ def summarize_results(results: list[CompilerResult]) -> dict[str, Any]:
     """Compute summary statistics grouped by compiler and circuit type."""
     import numpy as np
 
-    compilers = sorted(set(r.compiler for r in results))
+    compilers = sorted({r.compiler for r in results})
     circuit_types: dict[str, list[str]] = {}
 
     for r in results:
@@ -463,7 +463,7 @@ def print_summary(summary: dict[str, Any]) -> None:
     # Head-to-head
     h2h = summary.get("head_to_head_2q", {})
     if h2h:
-        print(f"\n\nHead-to-Head (2Q gates): QCO vs Qiskit-L3 (virtual)")
+        print("\n\nHead-to-Head (2Q gates): QCO vs Qiskit-L3 (virtual)")
         print(f"  QCO wins:       {h2h['qco_wins']}")
         print(f"  Qiskit-L3 wins: {h2h['qiskit_l3_wins']}")
         print(f"  Ties:           {h2h['ties']}")

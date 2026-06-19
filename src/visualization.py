@@ -3,16 +3,13 @@
 This module provides plotting functions for experimental analysis,
 generating figures suitable for arXiv preprint.
 
-Figure types (per SCOPE_OF_WORK.md Phase 4):
+Figure types:
 - Fidelity waterfall charts (stage-by-stage breakdown)
 - Per-pass effectiveness (bar charts/tables)
 - Scaling plots (qubits/depth vs fidelity)
 - Pulse comparison waveforms
 
-Following AgentBible principles:
-- Consistent styling across all figures
-- Publication-ready defaults (font sizes, DPI)
-- Type hints and clear documentation
+Uses consistent publication-ready styling (serif fonts, 300 DPI).
 """
 
 from __future__ import annotations

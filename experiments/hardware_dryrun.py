@@ -14,7 +14,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
 import sys
@@ -34,7 +33,7 @@ if env_path.exists():
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.corpus import CircuitCorpus, create_standard_corpus
+from src.corpus import create_standard_corpus
 from src.hardware import HardwareCircuit, IQMHardwareExecutor
 
 # Configure logging
@@ -146,7 +145,7 @@ def main() -> None:
         logger.info("Detailed per-circuit costs:")
         for name, cost in zip(
             [c.name for c in circuits_to_validate],
-            estimate["per_circuit_credits"],
+            estimate["per_circuit_credits"], strict=False,
         ):
             logger.info(f"  {name}: {cost} credits")
         logger.info("")

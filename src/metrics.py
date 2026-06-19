@@ -1,12 +1,9 @@
 """Metrics dataclasses for pipeline stage tracking.
 
 This module defines the data structures for collecting metrics at each stage
-of the quantum compilation pipeline, following AgentBible principles:
-- Type hints on ALL fields
-- Validation of physical constraints
-- Clear documentation
-
-Reference: ARCHITECTURE.md for full schema specification.
+of the quantum compilation pipeline. Dataclasses validate physical constraints
+(non-negative counts, fidelities and rates in [0, 1], T2 <= 2*T1) in
+__post_init__.
 """
 
 from __future__ import annotations

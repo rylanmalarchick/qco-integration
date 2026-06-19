@@ -20,7 +20,7 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -223,6 +223,7 @@ class IQMHardwareExecutor:
         Raises:
             RuntimeError: If dry_run=True or credentials not available.
         """
+        _ = backend  # accepted for backward compatibility; transpilation targets self.quantum_computer
         if self.dry_run:
             raise RuntimeError(
                 "Cannot execute in dry-run mode. Set dry_run=False and provide token."
@@ -236,8 +237,8 @@ class IQMHardwareExecutor:
         )
 
         try:
-            from qiskit import transpile
             from iqm.qiskit_iqm import IQMProvider
+            from qiskit import transpile
 
             # Connect to IQM
             provider = IQMProvider(
@@ -279,17 +280,17 @@ class IQMHardwareExecutor:
                     shots=shots,
                     counts=counts,
                     execution_time_ms=result.time_taken * 1000 if hasattr(result, "time_taken") else -1,
-                    metadata={"job_id": job_id},
+                    metadata={"job_id": job_id, "device": self.quantum_computer},
                 )
 
                 results.append(hw_result)
                 fidelity = hw_result.compute_fidelity()
                 logger.info(f"    Completed: {len(counts)} states, fidelity≈{fidelity:.3f}")
 
-            return results
+            return results  # noqa: TRY300 - happy path is the loop body, not an else block
 
-        except Exception as e:
-            logger.error(f"Hardware execution failed: {e}")
+        except Exception:  # noqa: BLE001 - log full context for a hardware run, then re-raise
+            logger.exception("Hardware execution failed")
             raise
 
     def _qasm_to_qiskit(self, qasm: str) -> Any:
@@ -383,6 +384,10 @@ def create_validation_report(
         hw_fidelities.append(hw_fid)
         sim_fidelities_list.append(sim_fid)
 
+        # Persist execution provenance (job_id, device) so a saved report is
+        # independently verifiable. Earlier reports dropped this, leaving runs
+        # impossible to confirm as real hardware after the fact.
+        meta = hw_result.metadata or {}
         report["circuits"].append(
             {
                 "name": hw_result.circuit_name,
@@ -391,6 +396,9 @@ def create_validation_report(
                 "difference": round(hw_fid - sim_fid, 4),
                 "shots": hw_result.shots,
                 "execution_time_ms": hw_result.execution_time_ms,
+                "job_id": meta.get("job_id"),
+                "device": meta.get("device") or meta.get("quantum_computer"),
+                "counts": hw_result.counts,
             }
         )
 
@@ -401,7 +409,10 @@ def create_validation_report(
         "mean_hardware_fidelity": round(statistics.mean(hw_fidelities), 4),
         "mean_simulated_fidelity": round(statistics.mean(sim_fidelities_list), 4),
         "mean_difference": round(
-            statistics.mean([h - s for h, s in zip(hw_fidelities, sim_fidelities_list)]), 4
+            statistics.mean(
+                [h - s for h, s in zip(hw_fidelities, sim_fidelities_list, strict=True)]
+            ),
+            4,
         ),
     }
 

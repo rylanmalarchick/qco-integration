@@ -6,12 +6,7 @@ This module provides utilities for working with OpenQASM 3.0 circuits:
 - Extracting gate statistics
 - Round-trip conversion verification
 
-Following AgentBible principles:
-- Type hints on all interfaces
-- Fail fast with context
-- Clear documentation
-
-Reference: SCOPE_OF_WORK.md Phase 1 Task 2
+Malformed QASM raises QASMParseError with context.
 """
 
 from __future__ import annotations

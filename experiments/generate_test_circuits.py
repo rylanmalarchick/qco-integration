@@ -20,13 +20,12 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any
 
 # Add src to path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.corpus import create_standard_corpus, CircuitSpec, CircuitType
+from src.corpus import create_standard_corpus
 from src.hardware import HardwareCircuit
 from src.qasm import extract_metrics
 
@@ -77,7 +76,7 @@ class TestCircuitGenerator:
         # Select circuits ensuring diversity
         circuits_per_type = max(1, num_circuits // len(circuits_by_type))
 
-        for circuit_type, type_circuits in circuits_by_type.items():
+        for _circuit_type, type_circuits in circuits_by_type.items():
             # Sort by depth to get diversity within each type
             sorted_circuits = sorted(
                 type_circuits,
@@ -234,7 +233,7 @@ class TestCircuitGenerator:
         depths = [c.depth for c in circuits]
         two_q_gates = [c.two_qubit_gates for c in circuits]
 
-        logger.info(f"  Circuit statistics:")
+        logger.info("  Circuit statistics:")
         logger.info(f"    Gate count: min={min(gates)}, max={max(gates)}, avg={sum(gates)//len(gates)}")
         logger.info(f"    Depth: min={min(depths)}, max={max(depths)}, avg={sum(depths)//len(depths)}")
         logger.info(f"    2Q gates: min={min(two_q_gates)}, max={max(two_q_gates)}, avg={sum(two_q_gates)//len(two_q_gates)}")

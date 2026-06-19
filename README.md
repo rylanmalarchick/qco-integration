@@ -8,23 +8,36 @@ This project provides an orchestration layer for analyzing fidelity degradation 
 
 ## Project Status
 
-**Phase 5: Complete** - End-to-end framework operational with real components and hardware validation support
+Active revision. An earlier version was submitted to ACM Transactions on Quantum
+Computing (manuscript TQC-2026-0027) and rejected; preprint
+[arXiv:2601.20871](https://arxiv.org/abs/2601.20871). The current work replaces
+the original simulation model with a validated one and rewrites the manuscript
+around what that model actually supports (see `docs/bakeoff_evidence.md` and the
+revised `paper/acm_tqc/main.tex`).
 
-### Completed Phases
+### What changed in this revision
 
-1. **Integration Architecture** - C++ optimizer + Python pulse simulation connected
-2. **Real Component Integration** - Working with actual quantum-circuit-optimizer binary
-3. **Experimental Campaign** - 371 circuits analyzed with real optimization + Lindblad simulation
-4. **Publication-Ready Paper** - 5-page arXiv preprint with real experimental results
-5. **Hardware Validation** - IQM Resonance integration with dry-run credit estimation
+- **Real fidelity model.** The original "Lindblad" fidelities were a closed-form
+  exponential-decay heuristic. They are replaced by a per-gate Lindblad
+  master-equation solve (relaxation + dephasing + a calibrated depolarizing
+  channel, plus idle decoherence on an ASAP schedule), cross-validated against
+  `qiskit-dynamics` to `<1e-7`. An optional non-Markovian `1/f` filter-function
+  model is included.
+- **Provenanced hardware run.** Eight circuits executed on IQM Resonance Garnet
+  (10,000 shots each, job IDs recorded). The validated model is a consistent
+  upper bound on measured fidelity (mean sim$-$hw gap 0.49); it preserves
+  relative circuit ordering but omits crosstalk, leakage, and readout error.
+- **Honest framing.** No "hardware-validated" claim for absolute fidelity; the
+  hardware run quantifies the model's error budget instead.
 
-### Key Results
+### Key results (validated model, 371-circuit campaign)
 
-- **23.1% mean gate reduction** (max 96.2%)
-- **CancellationPass most effective** (14,024 gates, 68% improved)
-- **Pulse duration strongest fidelity predictor** (r=-0.74, R²=0.55)
-- **251 passing tests**, clean linting
-- **Free-tier hardware validation** fits in 30 credits/month
+- Mean process fidelity **0.537** (median 0.603); mean gate reduction **9.1%** (max 40.0%)
+- **Cancellation is the dominant pass** (Cohen's d = 1.66); other passes negligible in isolation
+- Strongest fidelity predictors: **input gate count** (r = −0.78) and **pulse duration** (r = −0.73)
+- **Two-qubit** gate count, not total gate count, is the hardware-relevant compiler metric (QCO 17.7% 2Q reduction vs Qiskit-L2/L3 9.3%)
+- **281 passing tests** (3 are `qiskit-dynamics` cross-validation); `ruff` and `mypy --strict` clean
+- Hardware validation fits the IQM free tier (~0.9 of 30 credits/month)
 
 ## Installation
 
@@ -45,44 +58,44 @@ cp .env.example .env
 
 ```
 qco-integration/
-├── agent_docs/           # Project documentation for AI agents
-│   ├── PROJECT_CONTEXT.md
-│   ├── SCOPE_OF_WORK.md
-│   ├── ARCHITECTURE.md
-│   └── IQM_GARNET_SPEC.md
 ├── src/                  # Source code
 │   ├── bridge.py         # CircuitOptimizerBridge (C++ subprocess)
 │   ├── pipeline.py       # EndToEndPipeline (orchestration)
-│   ├── pulse.py          # PulseSimulator (Lindblad-based)
-│   ├── hardware.py       # IQMHardwareExecutor (validation)
+│   ├── pulse.py          # Per-gate Lindblad fidelity model
+│   ├── noise_spectrum.py # Non-Markovian 1/f filter-function dephasing
+│   ├── hardware.py       # IQMHardwareExecutor (IQM Resonance)
 │   ├── corpus.py         # CircuitCorpus (benchmarks)
 │   ├── metrics.py        # Dataclasses for metrics
 │   ├── runner.py         # BenchmarkRunner
 │   ├── analysis.py       # Statistical analysis
 │   ├── qasm.py           # QASM utilities
 │   └── visualization.py  # Plotting utilities
-├── experiments/          # Experiment scripts
-│   ├── run_campaign.py   # Full experimental campaign
-│   ├── hardware_dryrun.py # Credit estimation (no credentials needed!)
-│   └── hardware_validate.py # Hardware execution
+├── experiments/          # Experiment + figure/table scripts
+│   ├── run_campaign.py        # Full experimental campaign
+│   ├── run_ablation.py        # Ablation study
+│   ├── statistical_analysis.py # LaTeX tables + summary
+│   ├── hardware_dryrun.py     # Credit estimation (no credentials needed)
+│   └── hardware_validate.py   # Hardware execution
 ├── results/              # Output data (gitignored)
-├── paper/                # LaTeX preprint (ready to submit)
-├── tests/                # 251 passing tests
-├── HARDWARE_VALIDATION.md # Hardware validation guide
+├── docs/                 # bakeoff_evidence.md (thesis decision record)
+├── paper/acm_tqc/        # LaTeX manuscript (main.tex) + figures
+├── tests/                # pytest suite (281 tests; run `pytest`)
 └── README.md
 ```
 
 ## Dependencies
 
-### External Projects (not pip-installed)
+### External projects (not pip-installed)
 
 - **quantum-circuit-optimizer**: C++ circuit optimizer binary
-  - Location: See `QCO_OPTIMIZER_BINARY` in `.env`
-  - Required for: Circuit optimization, routing
+  - Location: set `QCO_OPTIMIZER_BINARY` (defaults to the sibling
+    `quantum-circuit-optimizer/build/` checkout)
+  - Required for: circuit optimization and routing
 
-- **QubitPulseOpt**: Python pulse optimization library
-  - Location: See `QUBIT_PULSE_OPT_PATH` in `.env`
-  - Required for: Pulse compilation, noise simulation
+The pulse-level fidelity model is implemented natively in `src/pulse.py`
+(per-gate Lindblad). `qiskit` / `qiskit-dynamics` are dev dependencies used by
+the hardware executor and the cross-validation tests; install with
+`pip install -e '.[dev]'`.
 
 ## Quick Start: Hardware Validation
 
@@ -102,37 +115,18 @@ python experiments/hardware_dryrun.py --num-circuits 10
 export IQM_CLIENT_ID='your-client-id'
 export IQM_CLIENT_SECRET='your-client-secret'
 
-# 4. Run hardware validation
-python experiments/hardware_validate.py --num-circuits 10 --shots 1000
+# 4. Run hardware validation on real Garnet (records job IDs)
+python experiments/hardware_validate.py --quantum-computer garnet --num-circuits 8 --shots 10000
 ```
-
-See [HARDWARE_VALIDATION.md](HARDWARE_VALIDATION.md) for detailed guide.
 
 ## Development
 
 ```bash
-# Run tests
-pytest
-
-# Type checking
-mypy src/
-
-# Linting
-ruff check .
-
-# Audit code against AgentBible principles
-python -m agentbible.cli.main audit ./src
+pytest                 # full suite (281 tests)
+pytest -m crossval     # qiskit-dynamics cross-validation of the noise model
+ruff check .           # lint
+mypy src/              # strict type check
 ```
-
-## AgentBible Principles
-
-This project follows the [AgentBible](https://pypi.org/project/agentbible/) principles:
-
-1. **Correctness First** - Physical accuracy is non-negotiable
-2. **Specification Before Code** - Tests define the contract
-3. **Fail Fast with Clarity** - Detect errors at boundaries
-4. **Simplicity by Design** - Simple code is correct code
-5. **Infrastructure Enables Speed** - Invest in tooling
 
 ## License
 

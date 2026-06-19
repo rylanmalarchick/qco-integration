@@ -4,15 +4,10 @@ This module provides the main pipeline class that coordinates:
 1. Circuit parsing and validation
 2. C++ optimizer (via CircuitOptimizerBridge)
 3. Routing for target topology
-4. Pulse compilation (via QubitPulseOpt)
+4. Pulse compilation (per-gate Lindblad model in src.pulse)
 5. Noise simulation
 
-Following AgentBible principles:
-- Clear stage-by-stage metrics collection
-- Fail fast with context
-- Type hints on all interfaces
-
-Reference: ARCHITECTURE.md for data flow specification.
+Metrics are collected at each stage; invalid input fails at the stage boundary.
 """
 
 from __future__ import annotations
@@ -590,7 +585,7 @@ def create_pipeline_with_mock(
     bridge = CircuitOptimizerBridge(optimizer_binary_path)
 
     if noise_params is None:
-        # IQM Garnet median values from IQM_GARNET_SPEC.md
+        # IQM Garnet median values (arXiv:2408.12433)
         noise_params = NoiseParams(
             t1_ns=37000.0,
             t2_ns=9600.0,
@@ -612,86 +607,79 @@ def create_pipeline_with_mock(
 
 
 class RealPulseGateCompiler:
-    """Adapter for RealGateCompiler to match GateCompilerProtocol.
+    """GateCompilerProtocol adapter backed by per-gate Lindblad simulation.
 
-    Uses qiskit-dynamics based Lindblad simulation for realistic fidelity.
+    Consumes the actual routed gate sequence (names, arities, parameters) and
+    composes per-gate fidelities via src.pulse.RealGateCompiler.
     """
 
     def __init__(self, noise_params: NoiseParams) -> None:
-        """Initialize with noise parameters.
-
-        Args:
-            noise_params: IQM Garnet noise parameters.
-        """
         from src.pulse import RealGateCompiler
 
         self.noise_params = noise_params
         self._compiler = RealGateCompiler(noise_params)
-        self._last_metrics: dict[str, Any] | None = None
-        self._last_gate_stats: dict[str, int] | None = None
+        self._last_gates: (
+            list[tuple[str, tuple[int, ...], tuple[float, ...]]] | None
+        ) = None
 
-    def _parse_qubit_index(self, qubit: int | str) -> int:
-        """Extract numeric qubit index from various formats.
-
-        Args:
-            qubit: Qubit identifier (int, 'q[0]', '0', etc.)
-
-        Returns:
-            Integer qubit index.
-        """
-        if isinstance(qubit, int):
-            return qubit
-        # Handle 'q[0]' format
-        if isinstance(qubit, str):
-            if "[" in qubit and "]" in qubit:
-                # Extract number from q[N] format
-                import re
-
-                match = re.search(r"\[(\d+)\]", qubit)
-                if match:
-                    return int(match.group(1))
-            # Try direct int conversion
+    @staticmethod
+    def _qubit_index(token: int | str) -> int | None:
+        """Parse a qubit operand ('q[3]', '3', 3) to its integer index."""
+        if isinstance(token, int):
+            return token
+        if isinstance(token, str):
+            if "[" in token and "]" in token:
+                try:
+                    return int(token[token.index("[") + 1 : token.index("]")])
+                except ValueError:
+                    return None
             try:
-                return int(qubit)
+                return int(token)
             except ValueError:
-                return 0
-        return 0
+                return None
+        return None
+
+    @classmethod
+    def _to_gate_tuples(
+        cls,
+        gate_sequence: list[dict[str, Any]],
+    ) -> list[tuple[str, tuple[int, ...], tuple[float, ...]]]:
+        """Convert pipeline gate dicts to (name, qubit-indices, params) tuples.
+
+        Real qubit indices are preserved so the simulator can ASAP-schedule the
+        circuit (idle decoherence depends on which qubits run concurrently). If
+        an operand cannot be parsed, fall back to range(arity). Non-numeric
+        parameter strings default to 0.0 (the angle changes fidelity below 1e-6
+        at these gate durations).
+        """
+        gates: list[tuple[str, tuple[int, ...], tuple[float, ...]]] = []
+        for g in gate_sequence:
+            name = str(g.get("name", "")).lower()
+            raw = g.get("qubits") or []
+            idxs = [cls._qubit_index(q) for q in raw]
+            arity = int(g.get("num_qubits") or len(idxs) or 1)
+            if any(i is None for i in idxs) or len(idxs) != arity:
+                qubits = tuple(range(arity))
+            else:
+                qubits = tuple(i for i in idxs if i is not None)
+            params: list[float] = []
+            for p in g.get("parameters", []) or []:
+                try:
+                    params.append(float(p))
+                except (TypeError, ValueError):
+                    params.append(0.0)
+            gates.append((name, qubits, tuple(params)))
+        return gates
 
     def compile_gate_sequence(
         self,
         gate_sequence: list[dict[str, Any]],
     ) -> dict[str, Any]:
-        """Compile gate sequence and cache metrics for simulation.
-
-        Args:
-            gate_sequence: List of gate dictionaries.
-
-        Returns:
-            Pulse data dictionary with metrics.
-        """
-        # Count gate types
-        num_gates = len(gate_sequence)
-        num_two_qubit = sum(1 for g in gate_sequence if g.get("num_qubits", 1) >= 2)
-
-        # Extract num_qubits from gate sequence
-        max_qubit = 0
-        for g in gate_sequence:
-            qubits = g.get("qubits", [0])
-            for q in qubits:
-                q_int = self._parse_qubit_index(q)
-                max_qubit = max(max_qubit, q_int)
-        num_qubits = max(1, max_qubit + 1)
-
-        # Use real compiler
-        proc_f, state_f, metrics = self._compiler.compile_and_simulate(
-            qasm="",  # Not needed, using gate stats
-            num_qubits=num_qubits,
-            num_gates=num_gates,
-            num_two_qubit_gates=num_two_qubit,
-        )
-
-        # Cache for simulate_with_noise
-        self._last_metrics = {
+        """Simulate the gate sequence; return pulse metrics and fidelities."""
+        gates = self._to_gate_tuples(gate_sequence)
+        self._last_gates = gates
+        proc_f, state_f, metrics = self._compiler.simulate_gates(gates)
+        return {
             "total_duration_ns": metrics.total_duration_ns,
             "pulse_count": metrics.pulse_count,
             "max_amplitude": metrics.max_amplitude,
@@ -699,76 +687,41 @@ class RealPulseGateCompiler:
             "state_fidelity": state_f,
         }
 
-        # Cache gate stats for re-simulation with different noise params
-        self._last_gate_stats = {
-            "num_qubits": num_qubits,
-            "num_gates": num_gates,
-            "num_two_qubit_gates": num_two_qubit,
-        }
-
-        return self._last_metrics
-
     def simulate_with_noise(
         self,
         pulses: dict[str, Any],
         noise_model: dict[str, float],
     ) -> dict[str, float]:
-        """Simulate with noise model, re-running Lindblad if params differ.
+        """Return fidelities for the compiled circuit under ``noise_model``.
 
-        If noise_model matches the construction-time params, returns cached
-        fidelities. Otherwise, creates a fresh PulseSimulator and re-simulates.
-
-        Args:
-            pulses: Pulse data from compile_gate_sequence.
-            noise_model: Noise parameters (t1_ns, t2_ns, error rates).
-
-        Returns:
-            Dictionary with process_fidelity and state_fidelity.
+        If the model matches construction-time noise, reuse the values from
+        compile_gate_sequence; otherwise re-simulate the cached gate sequence
+        with the override noise (used by the noise-sensitivity experiment).
         """
-        # Check if noise params match the default (cached result is valid)
         default_noise = {
             "t1_ns": self.noise_params.t1_ns,
             "t2_ns": self.noise_params.t2_ns,
             "single_qubit_error": self.noise_params.single_qubit_error,
             "two_qubit_error": self.noise_params.two_qubit_error,
         }
-        if noise_model == default_noise:
+        if noise_model == default_noise or self._last_gates is None:
             return {
-                "process_fidelity": pulses.get("process_fidelity", 0.9),
-                "state_fidelity": pulses.get("state_fidelity", 0.9),
-            }
-
-        # Noise params differ — re-simulate with override noise
-        if self._last_gate_stats is None:
-            # Fallback: no cached gate stats, return pulses as-is
-            return {
-                "process_fidelity": pulses.get("process_fidelity", 0.9),
-                "state_fidelity": pulses.get("state_fidelity", 0.9),
+                "process_fidelity": pulses["process_fidelity"],
+                "state_fidelity": pulses["state_fidelity"],
             }
 
         from src.pulse import RealGateCompiler
 
         override_noise = NoiseParams(
-            t1_ns=noise_model.get("t1_ns", self.noise_params.t1_ns),
-            t2_ns=noise_model.get("t2_ns", self.noise_params.t2_ns),
-            single_qubit_error=noise_model.get(
-                "single_qubit_error", self.noise_params.single_qubit_error
-            ),
-            two_qubit_error=noise_model.get(
-                "two_qubit_error", self.noise_params.two_qubit_error
-            ),
+            t1_ns=noise_model["t1_ns"],
+            t2_ns=noise_model["t2_ns"],
+            single_qubit_error=noise_model["single_qubit_error"],
+            two_qubit_error=noise_model["two_qubit_error"],
         )
-        compiler = RealGateCompiler(override_noise)
-        proc_f, state_f, _metrics = compiler.compile_and_simulate(
-            qasm="",
-            num_qubits=self._last_gate_stats["num_qubits"],
-            num_gates=self._last_gate_stats["num_gates"],
-            num_two_qubit_gates=self._last_gate_stats["num_two_qubit_gates"],
+        proc_f, state_f, _ = RealGateCompiler(override_noise).simulate_gates(
+            self._last_gates
         )
-        return {
-            "process_fidelity": proc_f,
-            "state_fidelity": state_f,
-        }
+        return {"process_fidelity": proc_f, "state_fidelity": state_f}
 
 
 
@@ -804,15 +757,18 @@ def create_real_pipeline(
     if use_mock_optimizer:
         bridge: OptimizerBridgeProtocol = MockCircuitOptimizerBridge()
     else:
-        # Path to real C++ optimizer
-        optimizer_path = Path(
-            "/home/rylan/dev/research/"
+        import os
+
+        default_binary = (
+            "/home/rylan/dev/projects/"
             "quantum-circuit-optimizer/build/quantum_circuit_optimizer"
         )
+        optimizer_path = Path(os.environ.get("QCO_OPTIMIZER_BINARY", default_binary))
         if not optimizer_path.exists():
             raise FileNotFoundError(
-                f"C++ optimizer not found at {optimizer_path}. "
-                "Build it or set use_mock_optimizer=True."
+                f"C++ optimizer not found at {optimizer_path}. Build "
+                "quantum-circuit-optimizer, set QCO_OPTIMIZER_BINARY, or pass "
+                "use_mock_optimizer=True."
             )
         bridge = CircuitOptimizerBridge(optimizer_path)
 

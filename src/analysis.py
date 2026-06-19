@@ -2,14 +2,8 @@
 
 This module provides analysis utilities for experimental results,
 including aggregation, statistical summaries, pass effectiveness
-analysis, and scaling behavior characterization.
-
-Following AgentBible principles:
-- Pure functions where possible
-- Clear type hints on all interfaces
-- Comprehensive docstrings
-
-Reference: SCOPE_OF_WORK.md Phase 3/4 requirements.
+analysis, and scaling behavior characterization. Functions are pure where
+possible and raise ValueError on empty or mismatched inputs.
 """
 
 from __future__ import annotations

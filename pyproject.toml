@@ -28,7 +28,6 @@ dependencies = [
     "numpy>=1.24",
     "scipy>=1.10",
     "pyyaml>=6.0",
-    "agentbible>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +37,10 @@ dev = [
     "ruff>=0.1",
     "mypy>=1.0",
     "pre-commit>=3.0",
+    # qiskit + qiskit-dynamics back the cross-validation tests (pytest -m crossval)
+    # and the hardware executor (qiskit-iqm). Not needed for the core model.
+    "qiskit>=1.0",
+    "qiskit-dynamics>=0.5",
 ]
 analysis = [
     "pandas>=2.0",
@@ -72,6 +75,7 @@ markers = [
     "integration: marks integration tests requiring external binaries",
     "requires_optimizer: marks tests requiring quantum-circuit-optimizer binary",
     "requires_pulseopt: marks tests requiring QubitPulseOpt",
+    "crossval: cross-implementation checks against an independent solver (qiskit-dynamics)",
 ]
 
 # ============================================================================
@@ -94,10 +98,27 @@ select = [
     "SIM",    # flake8-simplify
     "ARG",    # flake8-unused-arguments
     "PTH",    # flake8-use-pathlib
+    "BLE",    # flake8-blind-except (BLE001: no bare except Exception)
+    "TRY",    # tryceratops (exception anti-patterns)
+    "ERA",    # eradicate (commented-out code)
+    "PLR2004",  # magic value in comparison
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
+    "TRY003",  # long messages in raise — we prefer descriptive errors
+    # Physics/structure literals (qubit counts, Hilbert dimension d in {2,4},
+    # version index) read more clearly inline than as named constants in this
+    # domain; PLR2004 here flags clarity, not a real bug.
+    "PLR2004",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Experiment/figure scripts are research scaffolding, not shipped library code.
+# They legitimately: prepend sys.path before importing src (E402); probe optional
+# deps in try/except ImportError (F401); and swallow-and-continue per-item so one
+# bad circuit/plot does not abort a batch (BLE001, TRY400/TRY401). The shipped
+# package under src/ is held to the full ruleset.
+"experiments/*.py" = ["E402", "F401", "BLE001", "TRY400", "TRY401", "B007", "ERA001", "PTH123"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
@@ -116,7 +137,7 @@ disallow_incomplete_defs = true
 strict_equality = true
 
 [[tool.mypy.overrides]]
-module = ["numpy.*", "scipy.*", "yaml.*", "pandas.*", "matplotlib.*", "seaborn.*"]
+module = ["numpy.*", "scipy.*", "yaml.*", "pandas.*", "matplotlib.*", "seaborn.*", "qiskit", "qiskit.*", "qiskit_dynamics", "qiskit_dynamics.*", "iqm", "iqm.*"]
 ignore_missing_imports = true
 
 # ============================================================================

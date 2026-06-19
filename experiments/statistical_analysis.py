@@ -13,13 +13,11 @@ Usage:
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 from scipy import stats
-
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -28,14 +26,29 @@ from scipy import stats
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 
-COMPILER_PATH = RESULTS_DIR / "compiler_comparison" / "comparison_detail_20260207_204727.json"
-ABLATION_PATH = RESULTS_DIR / "ablation" / "ablation_20260207_195322.json"
-BASELINE_PATH = RESULTS_DIR / "acm_tqc_real" / "baseline_20260207_204438.json"
-PER_PASS_PATH = RESULTS_DIR / "acm_tqc_real" / "per_pass_20260207_204449.json"
-PASS_COMB_PATH = RESULTS_DIR / "acm_tqc_real" / "pass_combinations_20260207_204507.json"
+# Validated-model campaign (v2): baseline/per_pass/pass_combinations carry
+# fidelities from the per-gate Lindblad + idle-decoherence model. Ablation is
+# re-run with the same model. Compiler comparison stores pure gate counts and
+# is model-independent, so its existing data remains valid.
+CAMPAIGN_DIR = RESULTS_DIR / "acm_tqc_v2_validated"
 
-LATEX_OUT = RESULTS_DIR / "latex_tables.tex"
-SUMMARY_OUT = RESULTS_DIR / "statistical_summary.txt"
+
+def _latest(pattern: str) -> Path:
+    """Newest file matching a glob; fail loudly if none (no silent stale data)."""
+    matches = sorted(RESULTS_DIR.glob(pattern))
+    if not matches:
+        raise FileNotFoundError(f"No results match {pattern} under {RESULTS_DIR}")
+    return matches[-1]
+
+
+COMPILER_PATH = _latest("compiler_comparison/comparison_detail_*.json")
+ABLATION_PATH = _latest("ablation/ablation_2*.json")
+BASELINE_PATH = _latest("acm_tqc_v2_validated/baseline_*.json")
+PER_PASS_PATH = _latest("acm_tqc_v2_validated/per_pass_*.json")
+PASS_COMB_PATH = _latest("acm_tqc_v2_validated/pass_combinations_*.json")
+
+LATEX_OUT = CAMPAIGN_DIR / "latex_tables.tex"
+SUMMARY_OUT = CAMPAIGN_DIR / "statistical_summary.txt"
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +196,7 @@ def analyse_compiler_comparison(comp_data: dict) -> dict[str, Any]:
 
     # Cohen's d: QCO vs Qiskit-L3 and QCO vs Qiskit-L3-IQM
     cohens_d_results: dict[str, float] = {}
-    qco_arr = np.array([qco_twoq[c] for c in circuit_names if c in qco_twoq])
+    np.array([qco_twoq[c] for c in circuit_names if c in qco_twoq])
     for target in ["Qiskit-L3", "Qiskit-L3-IQM"]:
         other = {r["circuit_name"]: r["two_q_reduction_pct"]
                  for r in results if r["compiler"] == target}
@@ -475,10 +488,7 @@ def _bold_best(values: list[float], fmt: str = ".1f", higher_better: bool = True
     """Return formatted strings, bolding the best value."""
     if not values:
         return []
-    if higher_better:
-        best_val = max(values)
-    else:
-        best_val = min(values)
+    best_val = max(values) if higher_better else min(values)
     out = []
     for v in values:
         s = f"{v:{fmt}}"

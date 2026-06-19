@@ -1,14 +1,8 @@
 """CircuitOptimizerBridge: Subprocess wrapper for C++ quantum-circuit-optimizer.
 
 This module provides a Python interface to the quantum-circuit-optimizer C++ binary,
-handling JSON I/O and result parsing.
-
-Following AgentBible principles:
-- Fail fast with clear error messages
-- Validate inputs at boundaries
-- Type hints on all functions
-
-Reference: SCOPE_OF_WORK.md for CLI interface specification.
+handling JSON I/O and result parsing. Inputs are validated at the boundary and
+subprocess/JSON failures raise with context.
 """
 
 from __future__ import annotations
@@ -22,7 +16,7 @@ from typing import Any
 
 from src.metrics import PassMetrics, RoutingMetrics, StageMetrics
 
-# Valid optimization passes (from SCOPE_OF_WORK.md)
+# Valid optimization passes accepted by the C++ optimizer CLI
 VALID_PASSES = frozenset({"cancel", "commute", "rotate", "identity"})
 
 # Default subprocess timeout in seconds
@@ -89,9 +83,8 @@ class CircuitOptimizerBridge:
         if not self.binary_path.exists():
             raise FileNotFoundError(
                 f"Optimizer binary not found: {self.binary_path}\n"
-                f"Expected location from PROJECT_CONTEXT.md: "
-                f"/home/rylan/dev/research/"
-                f"quantum-circuit-optimizer/build/quantum_circuit_optimizer"
+                f"Set QCO_OPTIMIZER_BINARY or build quantum-circuit-optimizer; "
+                f"default: <repo>/../quantum-circuit-optimizer/build/quantum_circuit_optimizer"
             )
         if not self.binary_path.is_file():
             raise FileNotFoundError(
@@ -254,12 +247,12 @@ class CircuitOptimizerBridge:
         )
         try:
             result_data: dict[str, Any] = json.loads(output_text)
-            return result_data
         except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"Optimizer returned invalid JSON: {e}\n"
                 f"Output was: {output_text[:500]}"
             ) from e
+        return result_data
 
     def _parse_stage_metrics(self, data: dict[str, Any]) -> StageMetrics:
         """Parse stage metrics from JSON data.

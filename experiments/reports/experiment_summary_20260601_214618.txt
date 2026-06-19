@@ -1,0 +1,39 @@
+============================================================
+EXPERIMENT SUMMARY
+============================================================
+
+Total circuits analyzed: 20
+
+PROCESS FIDELITY
+------------------------------
+  Mean:   0.8171
+  Std:    0.1004
+  Min:    0.6834
+  Max:    0.9446
+  Median: 0.8171
+
+GATE REDUCTION (%)
+------------------------------
+  Mean:   0.0%
+  Std:    0.0%
+  Min:    0.0%
+  Max:    0.0%
+
+PASS EFFECTIVENESS
+------------------------------
+  IdentityEliminationPass: 0 gates (0% improved)
+  CancellationPass: 0 gates (0% improved)
+  CommutationPass: 0 gates (0% improved)
+  RotationMergePass: 0 gates (0% improved)
+
+Best pass:  IdentityEliminationPass
+Worst pass: RotationMergePass
+
+SCALING ANALYSIS
+------------------------------
+  input_qubits vs fidelity: r=-0.249, R²=0.062
+  input_gates vs fidelity: r=-0.838, R²=0.702
+  input_depth vs fidelity: r=-0.900, R²=0.810
+  input_2q_gates vs fidelity: r=-0.907, R²=0.823
+  pulse_duration_ns vs fidelity: r=-0.938, R²=0.879
+============================================================

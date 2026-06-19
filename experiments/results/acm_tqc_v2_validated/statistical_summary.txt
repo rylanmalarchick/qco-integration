@@ -1,0 +1,82 @@
+========================================================================
+STATISTICAL ANALYSIS SUMMARY - QCO ACM TQC Submission
+========================================================================
+
+1. CAMPAIGN SUMMARY (Full Pipeline)
+----------------------------------------
+   Total circuits: 371
+   Total experiment runs: 4452
+   Mean process fidelity: 0.537
+   Median process fidelity: 0.603
+   Std. dev. fidelity: 0.326
+   Mean gate reduction: 9.1%
+   Median gate reduction: 9.3%
+   Max gate reduction: 40.0%
+
+2. PASS EFFECTIVENESS
+----------------------------------------
+   #1 cancel: 3780 gates removed, 72.0% circuits improved (N=371)
+   #2 rotate: 4 gates removed, 0.8% circuits improved (N=371)
+   #3 commute: 0 gates removed, 0.0% circuits improved (N=371)
+   #4 identity: 0 gates removed, 0.0% circuits improved (N=371)
+
+3. COMPILER COMPARISON
+----------------------------------------
+   QCO            : gate= 18.9%  2Q= 17.7% [14.2, 21.4]  depth= 13.9%  time=0.0036s
+   Qiskit-L0      : gate=  0.0%  2Q=  0.0% [0.0, 0.0]  depth=  0.0%  time=0.0029s
+   Qiskit-L1      : gate= 42.9%  2Q=  2.6% [1.8, 3.5]  depth= 34.3%  time=0.0039s
+   Qiskit-L1-IQM  : gate=  8.8%  2Q=  2.2% [1.2, 3.2]  depth=-14.4%  time=0.0046s
+   Qiskit-L2      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0070s
+   Qiskit-L3      : gate= 47.7%  2Q=  9.3% [7.4, 11.4]  depth= 37.9%  time=0.0085s
+   Qiskit-L3-IQM  : gate= 17.4%  2Q= 13.4% [11.4, 15.5]  depth= -5.8%  time=0.0111s
+
+   Wilcoxon signed-rank test (QCO vs each, on 2Q gate reduction):
+   vs Qiskit-L0      : W=0.0, p < 0.001, N_pairs=371, N_nonzero=127
+   vs Qiskit-L1      : W=1.0, p < 0.001, N_pairs=371, N_nonzero=58
+   vs Qiskit-L1-IQM  : W=1.0, p < 0.001, N_pairs=371, N_nonzero=58
+   vs Qiskit-L2      : W=6214.5, p = 0.200, N_pairs=371, N_nonzero=167
+   vs Qiskit-L3      : W=6214.5, p = 0.200, N_pairs=371, N_nonzero=167
+   vs Qiskit-L3-IQM  : W=12275.0, p = 0.012, N_pairs=371, N_nonzero=245
+
+   Cohen's d (QCO vs Qiskit, on 2Q gate reduction):
+   vs Qiskit-L3: d = 0.291 (small)
+   vs Qiskit-L3-IQM: d = 0.149 (negligible)
+
+   Head-to-head (QCO wins/losses/ties by output 2Q gate count):
+   vs Qiskit-L0      : W=127 L=0 T=244
+   vs Qiskit-L1      : W=57 L=1 T=313
+   vs Qiskit-L1-IQM  : W=57 L=1 T=313
+   vs Qiskit-L2      : W=57 L=110 T=204
+   vs Qiskit-L3      : W=57 L=110 T=204
+   vs Qiskit-L3-IQM  : W=57 L=188 T=126
+
+   Per circuit type (mean 2Q gate reduction %):
+   GHZ     : QCO=0.0%  L3=0.0%  L3-IQM=0.0%
+   QAOA    : QCO=100.0%  L3=1.5%  L3-IQM=1.0%
+   QFT     : QCO=87.8%  L3=12.2%  L3-IQM=12.2%
+   Random  : QCO=3.2%  L3=10.9%  L3-IQM=16.0%
+
+4. ABLATION STUDY
+----------------------------------------
+
+   Individual passes:
+   cancel      : gate=  9.1%  2Q=  2.6%  fidelity=0.537  d=1.657
+   rotate      : gate=  0.0%  2Q=  0.0%  fidelity=0.525  d=0.093
+   commute     : gate=  0.0%  2Q=  0.0%  fidelity=0.524  d=0.000
+   identity    : gate=  0.0%  2Q=  0.0%  fidelity=0.525  d=0.000
+
+   Leave-one-out:
+   w/o identity        : gate=  9.1%  fidelity=0.536  marginal=+0.0%  d=0.000
+   w/o commute         : gate=  9.1%  fidelity=0.536  marginal=+0.0%  d=0.000
+   w/o rotate          : gate=  9.1%  fidelity=0.536  marginal=+0.0%  d=0.005
+   w/o cancel          : gate=  0.0%  fidelity=0.524  marginal=+9.1%  d=1.657
+
+   Ordering - Kruskal-Wallis: H=6.05, p = 0.302
+   commute -> cancel -> rotate -> identity      : gate=  9.9% [9.1, 10.8]  2Q=  2.8%  fidelity=0.538
+   identity -> rotate -> commute -> cancel      : gate=  9.9% [9.1, 10.8]  2Q=  2.8%  fidelity=0.538
+   cancel -> commute -> rotate -> identity      : gate=  9.1% [8.3, 9.9]  2Q=  2.6%  fidelity=0.537
+   cancel -> rotate -> commute -> identity      : gate=  9.1% [8.3, 9.9]  2Q=  2.6%  fidelity=0.537
+   identity -> cancel -> commute -> rotate      : gate=  9.1% [8.3, 9.9]  2Q=  2.6%  fidelity=0.535
+   rotate -> cancel -> commute -> identity      : gate=  9.1% [8.3, 9.9]  2Q=  2.6%  fidelity=0.535
+
+========================================================================

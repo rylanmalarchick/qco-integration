@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-Simple batch submission: submit all 8 jobs (4 original + 4 optimized) 
+Simple batch submission: submit all 8 jobs (4 original + 4 optimized)
 and save job IDs for later retrieval.
 """
-from pathlib import Path
+import logging
 import os
 import sys
-import json
 import time
-import logging
+from dataclasses import dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from pathlib import Path
 
 # Load .env
 env_path = Path(__file__).parent.parent / ".env"
@@ -26,10 +25,11 @@ if env_path.exists():
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from iqm.iqm_client import IQMClient
+
+from src.bridge import CircuitOptimizerBridge
 from src.corpus import create_standard_corpus
 from src.hardware import IQMHardwareExecutor
-from src.bridge import CircuitOptimizerBridge
-from iqm.iqm_client import IQMClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -48,16 +48,16 @@ def main():
     print("BATCH SUBMISSION: 4 Circuits (Original + Optimized)")
     print("=" * 80)
     print()
-    
+
     # Load circuits
     corpus = create_standard_corpus()
     circuits_list = [c for c in corpus if c.spec.num_qubits <= 12][:4]
-    
-    print(f"Circuits to test:")
+
+    print("Circuits to test:")
     for i, c in enumerate(circuits_list, 1):
         print(f"  {i}. {c.spec.name}")
     print()
-    
+
     # Setup
     executor = IQMHardwareExecutor(quantum_computer='garnet', dry_run=False)
     optimizer_binary = (
@@ -67,22 +67,22 @@ def main():
     optimizer = CircuitOptimizerBridge(str(optimizer_binary))
     shots = 160
     jobs = []
-    
+
     token = os.environ.get('RESONANCE_API_TOKEN')
-    iqm_client = IQMClient('https://resonance.meetiqm.com/garnet', token=token)
-    
+    IQMClient('https://resonance.meetiqm.com/garnet', token=token)
+
     print(f"Submitting {len(circuits_list) * 2} jobs ({len(circuits_list)} circuits × 2 versions)...\n")
-    
+
     for circuit in circuits_list:
         name = circuit.spec.name
         qubits = circuit.spec.num_qubits
-        
+
         # ORIGINAL
         print(f"{name}: Submitting ORIGINAL...")
         try:
-            results = executor.execute([circuit], shots=shots)
+            executor.execute([circuit], shots=shots)
             # Note: results don't have job_id tracking, so we'll note this
-            print(f"  ✓ Executed (results in memory)")
+            print("  ✓ Executed (results in memory)")
             # Store for later reference
             jobs.append(JobRecord(
                 job_id=f"memory-original-{name}",
@@ -94,16 +94,16 @@ def main():
             ))
         except Exception as e:
             print(f"  ✗ {e}")
-        
+
         time.sleep(1)
-        
+
         # OPTIMIZED
         print(f"{name}: Submitting OPTIMIZED...")
         try:
             opt_result = optimizer.optimize(circuit.qasm, name, ["cancel", "commute", "rotate"])
             print(f"  Optimization complete: {opt_result.input_metrics.gates} → {opt_result.post_optimization.gates} gates")
             # Would execute optimized but executor.execute needs BenchmarkCircuit
-            print(f"  ✓ Optimized circuit ready")
+            print("  ✓ Optimized circuit ready")
             jobs.append(JobRecord(
                 job_id=f"memory-optimized-{name}",
                 circuit_name=name,
@@ -114,9 +114,9 @@ def main():
             ))
         except Exception as e:
             print(f"  ✗ {e}")
-        
+
         time.sleep(1)
-    
+
     print()
     print("=" * 80)
     print(f"Summary: {len(jobs)} jobs processed")

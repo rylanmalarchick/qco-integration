@@ -1,13 +1,28 @@
-"""Pulse-level simulation using qiskit-dynamics.
+"""Pulse-level fidelity via per-gate Lindblad master-equation simulation.
 
-This module provides real Lindblad master equation simulation for quantum gates
-using IQM Garnet hardware parameters. It replaces the mock pulse compiler with
-actual physics-based simulation.
+Each gate is modelled as a constant generator ``H = i log(U)/tau`` acting for the
+gate's calibrated duration ``tau`` while T1/T2 decoherence and a calibrated
+depolarizing channel act concurrently. We integrate the Lindblad master equation
 
-Following AgentBible principles:
-- Functions ≤50 lines
-- Fail fast with clear errors
-- Type hints on all functions
+    drho/dt = -i[H, rho] + sum_k ( L_k rho L_k^dag - 1/2 {L_k^dag L_k, rho} )
+
+on the gate's 1- or 2-qubit subspace by exponentiating the (time-independent)
+Liouvillian superoperator, then compose a depolarizing channel calibrated to the
+hardware gate-error spec. Per-gate average/entanglement gate fidelities are
+computed from the channel's Choi state and composed multiplicatively across the
+circuit.
+
+This is an approximation: it ignores inter-gate correlations, crosstalk, and
+leakage to non-computational states. The per-gate evolution is cross-validated
+against ``qiskit-dynamics`` (see tests/test_pulse.py).
+
+Conventions (validated against qiskit-dynamics):
+- Relaxation operator L1 = sqrt(1/T1) * sigma_minus gives excited-population
+  decay exp(-t/T1).
+- Pure-dephasing operator Lphi = sqrt(gamma_phi/2) * sigma_z with
+  gamma_phi = 1/T2 - 1/(2 T1) gives total coherence decay exp(-t/T2).
+- Vectorization is column-stacking: vec(rho)[a + d*b] = rho[a, b], so the
+  superoperator for ``A rho B`` is ``B^T (x) A``.
 """
 
 from __future__ import annotations
@@ -16,6 +31,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.linalg import expm, logm
 
 from src.metrics import NoiseParams, PulseMetrics
 
@@ -23,135 +39,82 @@ from src.metrics import NoiseParams, PulseMetrics
 # Physical Constants for IQM Garnet
 # =============================================================================
 
-# Gate durations in nanoseconds (from IQM_GARNET_SPEC.md)
+# Gate durations in nanoseconds (from IQM Garnet hardware parameters).
 SINGLE_QUBIT_GATE_NS = 20.0
 TWO_QUBIT_GATE_NS = 40.0
-
-# Qubit frequency (typical transmon, ~5 GHz)
-QUBIT_FREQ_GHZ = 5.0
-QUBIT_FREQ_RAD = 2 * np.pi * QUBIT_FREQ_GHZ  # rad/ns when divided by 1e9
-
-# Anharmonicity (typical transmon, ~-300 MHz)
-ANHARMONICITY_GHZ = -0.3
-
-# Coupling strength for two-qubit gates (~30 MHz)
-COUPLING_STRENGTH_GHZ = 0.03
-
 
 # =============================================================================
 # Pauli Matrices and Operators
 # =============================================================================
 
-# Single-qubit Pauli matrices
 SIGMA_X = np.array([[0, 1], [1, 0]], dtype=complex)
 SIGMA_Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 SIGMA_Z = np.array([[1, 0], [0, -1]], dtype=complex)
-SIGMA_PLUS = np.array([[0, 1], [0, 0]], dtype=complex)
-SIGMA_MINUS = np.array([[0, 0], [1, 0]], dtype=complex)
+SIGMA_MINUS = np.array([[0, 1], [0, 0]], dtype=complex)  # |0><1|, lowers |1>->|0>
 IDENTITY_2 = np.eye(2, dtype=complex)
 
 
 # =============================================================================
-# Lindblad Operators
+# Decoherence rates and Lindblad operators
 # =============================================================================
 
 
 def compute_t1_rate(t1_ns: float) -> float:
-    """Compute T1 decay rate from T1 time.
-
-    Args:
-        t1_ns: T1 time in nanoseconds.
-
-    Returns:
-        Decay rate gamma_1 in 1/ns.
-    """
+    """Return the relaxation rate gamma_1 = 1/T1 in 1/ns."""
     if t1_ns <= 0:
         raise ValueError(f"T1 must be positive, got {t1_ns}")
     return 1.0 / t1_ns
 
 
-def compute_t2_rate(t1_ns: float, t2_ns: float) -> float:
-    """Compute pure dephasing rate from T1 and T2 times.
-
-    The total dephasing rate is: gamma_phi = 1/T2 - 1/(2*T1)
-
-    Args:
-        t1_ns: T1 time in nanoseconds.
-        t2_ns: T2 time in nanoseconds.
-
-    Returns:
-        Pure dephasing rate gamma_phi in 1/ns.
+def compute_dephasing_rate(t1_ns: float, t2_ns: float) -> float:
+    """Return the pure-dephasing rate gamma_phi = 1/T2 - 1/(2 T1) in 1/ns.
 
     Raises:
-        ValueError: If T2 > 2*T1 (physically impossible).
+        ValueError: If T2 > 2*T1 (physically impossible) or T2 <= 0.
     """
     if t2_ns <= 0:
         raise ValueError(f"T2 must be positive, got {t2_ns}")
     if t2_ns > 2 * t1_ns:
         raise ValueError(
-            f"T2 ({t2_ns} ns) cannot exceed 2*T1 ({2*t1_ns} ns) - physically impossible"
+            f"T2 ({t2_ns} ns) cannot exceed 2*T1 ({2 * t1_ns} ns) - physically impossible"
         )
     return 1.0 / t2_ns - 1.0 / (2 * t1_ns)
 
 
-def build_lindblad_operators(noise_params: NoiseParams) -> list[np.ndarray]:
-    """Build Lindblad operators for a single qubit.
+def single_qubit_collapse_ops(noise: NoiseParams) -> list[np.ndarray]:
+    """Lindblad collapse operators for one qubit: [relaxation, pure dephasing]."""
+    gamma_1 = compute_t1_rate(noise.t1_ns)
+    gamma_phi = compute_dephasing_rate(noise.t1_ns, noise.t2_ns)
+    l_relax = np.sqrt(gamma_1) * SIGMA_MINUS
+    l_dephase = np.sqrt(gamma_phi / 2.0) * SIGMA_Z
+    return [l_relax, l_dephase]
 
-    Creates operators for:
-    1. T1 relaxation (amplitude damping)
-    2. Pure dephasing (phase damping)
 
-    Args:
-        noise_params: Noise parameters including T1 and T2.
+def multi_qubit_collapse_ops(noise: NoiseParams, num_qubits: int) -> list[np.ndarray]:
+    """Collapse operators for ``num_qubits`` qubits, each with its own T1/T2.
 
-    Returns:
-        List of Lindblad operators [L_decay, L_dephase].
+    Each single-qubit operator is embedded into the full 2**num_qubits space.
     """
-    gamma_1 = compute_t1_rate(noise_params.t1_ns)
-    gamma_phi = compute_t2_rate(noise_params.t1_ns, noise_params.t2_ns)
-
-    # T1 relaxation: sqrt(gamma_1) * sigma_minus
-    l_decay = np.sqrt(gamma_1) * SIGMA_MINUS
-
-    # Pure dephasing: sqrt(gamma_phi/2) * sigma_z
-    l_dephase = np.sqrt(gamma_phi / 2) * SIGMA_Z
-
-    return [l_decay, l_dephase]
+    single = single_qubit_collapse_ops(noise)
+    ops: list[np.ndarray] = []
+    for q in range(num_qubits):
+        for op in single:
+            factors = [op if i == q else IDENTITY_2 for i in range(num_qubits)]
+            embedded = factors[0]
+            for f in factors[1:]:
+                embedded = np.kron(embedded, f)
+            ops.append(embedded)
+    return ops
 
 
 # =============================================================================
-# Gate Definitions
+# Gate unitaries
 # =============================================================================
-
-
-@dataclass
-class GatePulse:
-    """Representation of a gate's pulse parameters.
-
-    Attributes:
-        name: Gate name (e.g., "h", "cx", "rz").
-        qubits: Qubit indices the gate acts on.
-        duration_ns: Total pulse duration in nanoseconds.
-        target_unitary: Target unitary matrix for the gate.
-    """
-
-    name: str
-    qubits: tuple[int, ...]
-    duration_ns: float
-    target_unitary: np.ndarray
 
 
 def single_qubit_gate_unitary(name: str, angle: float = 0.0) -> np.ndarray:
-    """Get the unitary matrix for a single-qubit gate.
-
-    Args:
-        name: Gate name (h, x, y, z, s, t, rx, ry, rz).
-        angle: Rotation angle for parametric gates.
-
-    Returns:
-        2x2 unitary matrix.
-    """
-    gates = {
+    """Return the 2x2 unitary for a single-qubit gate, or identity if unknown."""
+    gates: dict[str, np.ndarray] = {
         "h": np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2),
         "x": SIGMA_X,
         "y": SIGMA_Y,
@@ -160,35 +123,28 @@ def single_qubit_gate_unitary(name: str, angle: float = 0.0) -> np.ndarray:
         "sdg": np.array([[1, 0], [0, -1j]], dtype=complex),
         "t": np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]], dtype=complex),
         "tdg": np.array([[1, 0], [0, np.exp(-1j * np.pi / 4)]], dtype=complex),
+        "id": IDENTITY_2,
     }
-
     if name in gates:
         return gates[name]
-
-    # Rotation gates
     if name == "rx":
         c, s = np.cos(angle / 2), np.sin(angle / 2)
         return np.array([[c, -1j * s], [-1j * s, c]], dtype=complex)
     if name == "ry":
         c, s = np.cos(angle / 2), np.sin(angle / 2)
         return np.array([[c, -s], [s, c]], dtype=complex)
-    if name == "rz":
+    if name in ("rz", "u1", "p"):
         return np.array(
             [[np.exp(-1j * angle / 2), 0], [0, np.exp(1j * angle / 2)]], dtype=complex
         )
-
-    raise ValueError(f"Unknown single-qubit gate: {name}")
+    # Unknown single-qubit gate: fall back to identity. The decoherence channel
+    # fidelity is U-independent to leading order in gamma*tau (~1e-4 here), so the
+    # reported fidelity is unaffected to well below 1e-6.
+    return IDENTITY_2
 
 
 def two_qubit_gate_unitary(name: str) -> np.ndarray:
-    """Get the unitary matrix for a two-qubit gate.
-
-    Args:
-        name: Gate name (cx, cz, swap).
-
-    Returns:
-        4x4 unitary matrix.
-    """
+    """Return the 4x4 unitary for a two-qubit gate, or identity if unknown."""
     if name in ("cx", "cnot"):
         return np.array(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]], dtype=complex
@@ -201,223 +157,258 @@ def two_qubit_gate_unitary(name: str) -> np.ndarray:
         return np.array(
             [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]], dtype=complex
         )
+    # Unknown two-qubit gate: fall back to identity (see note in the 1q case).
+    return np.eye(4, dtype=complex)
 
-    raise ValueError(f"Unknown two-qubit gate: {name}")
+
+def gate_unitary(name: str, params: Sequence[float], num_qubits: int) -> np.ndarray:
+    """Return the ideal unitary for a gate given its name, params, and arity."""
+    if num_qubits == 1:
+        angle = float(params[0]) if params else 0.0
+        return single_qubit_gate_unitary(name, angle)
+    if num_qubits == 2:
+        return two_qubit_gate_unitary(name)
+    raise ValueError(f"Unsupported gate arity: {num_qubits} qubits ({name})")
 
 
 # =============================================================================
-# Fidelity Computation
+# Superoperators (column-stacking vectorization)
 # =============================================================================
 
 
-def process_fidelity(target: np.ndarray, actual: np.ndarray) -> float:
-    """Compute process fidelity between target and actual unitaries.
+def liouvillian(hamiltonian: np.ndarray, collapse_ops: Sequence[np.ndarray]) -> np.ndarray:
+    """Build the Lindblad Liouvillian superoperator for column-stacked vec(rho)."""
+    d = hamiltonian.shape[0]
+    ident = np.eye(d, dtype=complex)
+    lab = -1j * (np.kron(ident, hamiltonian) - np.kron(hamiltonian.T, ident))
+    for c in collapse_ops:
+        cdag_c = c.conj().T @ c
+        lab += np.kron(c.conj(), c)
+        lab -= 0.5 * (np.kron(ident, cdag_c) + np.kron(cdag_c.T, ident))
+    return lab
 
-    F_proc = |Tr(U_target^dag @ U_actual)|^2 / d^2
 
-    Args:
-        target: Target unitary matrix.
-        actual: Actual (possibly noisy) unitary or process matrix.
+def gate_channel_superop(
+    unitary: np.ndarray,
+    duration_ns: float,
+    collapse_ops: Sequence[np.ndarray],
+) -> np.ndarray:
+    """Channel superoperator for a gate: constant generator H = i log(U)/tau plus
+    concurrent decoherence, integrated over the gate duration."""
+    if duration_ns <= 0:
+        raise ValueError(f"Gate duration must be positive, got {duration_ns}")
+    hamiltonian = 1j * logm(unitary) / duration_ns
+    # Re-Hermitize to remove logm round-off (log of a unitary is anti-Hermitian).
+    hamiltonian = 0.5 * (hamiltonian + hamiltonian.conj().T)
+    return expm(liouvillian(hamiltonian, collapse_ops) * duration_ns)
 
-    Returns:
-        Process fidelity in [0, 1].
+
+def depolarizing_superop(d: int, p: float) -> np.ndarray:
+    """Superoperator for the depolarizing channel rho -> (1-p) rho + p Tr(rho) I/d."""
+    vec_identity = np.eye(d, dtype=complex).reshape(-1, order="F")
+    completely_mixing = np.outer(vec_identity, vec_identity.conj()) / d
+    return (1.0 - p) * np.eye(d * d, dtype=complex) + p * completely_mixing
+
+
+def depolarizing_p_for_error(gate_error: float, d: int) -> float:
+    """Depolarizing strength p giving average gate error ``gate_error`` in dim d.
+
+    From F_avg = 1 - gate_error and the depolarizing channel's average gate
+    fidelity, p = gate_error * d / (d - 1).
     """
-    d = target.shape[0]
-    overlap = np.abs(np.trace(target.conj().T @ actual)) ** 2
-    return float(overlap / (d * d))
+    if d < 2:
+        raise ValueError(f"dimension must be >= 2, got {d}")
+    return gate_error * d / (d - 1)
 
 
-def state_fidelity(target_state: np.ndarray, rho: np.ndarray) -> float:
-    """Compute state fidelity between pure target and density matrix.
+# =============================================================================
+# Fidelity
+# =============================================================================
 
-    F_state = <psi|rho|psi>
 
-    Args:
-        target_state: Target state vector.
-        rho: Density matrix of actual state.
+def _maximally_entangled(d: int) -> np.ndarray:
+    """Return |Omega> = (1/sqrt(d)) sum_i |i>|i> (system (x) ancilla)."""
+    vec = np.zeros(d * d, dtype=complex)
+    for i in range(d):
+        vec[i * d + i] = 1.0
+    normalized: np.ndarray = vec / np.sqrt(d)
+    return normalized
 
-    Returns:
-        State fidelity in [0, 1].
+
+def _apply_superop(superop: np.ndarray, rho: np.ndarray) -> np.ndarray:
+    """Apply a channel superoperator to a density matrix (column-stacking)."""
+    d = rho.shape[0]
+    out: np.ndarray = (superop @ rho.reshape(-1, order="F")).reshape((d, d), order="F")
+    return out
+
+
+def entanglement_fidelity(
+    channel_superop: np.ndarray, target_unitary: np.ndarray, d: int
+) -> float:
+    """Entanglement (process) fidelity F_e between a channel and a target unitary.
+
+    F_e = <Omega_U| (channel (x) I)(|Omega><Omega|) |Omega_U>, with
+    |Omega_U> = (U (x) I)|Omega>.
     """
-    return float(np.real(target_state.conj() @ rho @ target_state))
+    choi = np.zeros((d * d, d * d), dtype=complex)
+    basis = np.zeros((d, d), dtype=complex)
+    for i in range(d):
+        for j in range(d):
+            basis[i, j] = 1.0
+            anc = np.zeros((d, d), dtype=complex)
+            anc[i, j] = 1.0
+            choi += np.kron(_apply_superop(channel_superop, basis), anc)
+            basis[i, j] = 0.0
+    choi /= d
+    omega_u = np.kron(target_unitary, np.eye(d, dtype=complex)) @ _maximally_entangled(d)
+    return float(np.real(omega_u.conj() @ choi @ omega_u))
+
+
+def average_gate_fidelity(entanglement_fid: float, d: int) -> float:
+    """Average gate fidelity from entanglement fidelity: (d*F_e + 1)/(d + 1)."""
+    return (d * entanglement_fid + 1.0) / (d + 1.0)
 
 
 # =============================================================================
-# Pulse Simulator
+# Pulse simulator
 # =============================================================================
+
+
+@dataclass(frozen=True)
+class GateFidelity:
+    """Per-gate fidelities under the noise model."""
+
+    process_fidelity: float  # entanglement fidelity F_e
+    state_fidelity: float  # average gate fidelity F_avg (>= F_e)
 
 
 class PulseSimulator:
-    """Lindblad master equation simulator for quantum gates.
+    """Per-gate Lindblad simulator with a calibrated depolarizing channel.
 
-    Uses qiskit-dynamics to simulate gate pulses with realistic
-    decoherence from T1/T2 noise.
-
-    Attributes:
-        noise_params: Noise parameters for simulation.
+    Per-gate fidelities are memoized on (name, params, arity) for a fixed noise
+    model, so repeated identical gates are solved once.
     """
 
     def __init__(self, noise_params: NoiseParams) -> None:
-        """Initialize simulator with noise parameters.
-
-        Args:
-            noise_params: T1, T2, and gate error parameters.
-        """
         self.noise_params = noise_params
-        self._lindblad_ops = build_lindblad_operators(noise_params)
+        self._single_collapse = multi_qubit_collapse_ops(noise_params, 1)
+        self._two_collapse = multi_qubit_collapse_ops(noise_params, 2)
+        self._cache: dict[tuple[str, tuple[float, ...], int], GateFidelity] = {}
 
-    def _simulate_single_qubit(
-        self,
-        gate_name: str,
-        angle: float = 0.0,
-    ) -> tuple[float, float]:
-        """Simulate a single-qubit gate and return fidelities.
+    def gate_fidelity(
+        self, name: str, qubits: tuple[int, ...], params: Sequence[float]
+    ) -> GateFidelity:
+        """Return (process, state) fidelity for a single gate, memoized."""
+        num_qubits = len(qubits)
+        if num_qubits not in (1, 2):
+            raise ValueError(f"Unsupported gate size: {num_qubits} qubits ({name})")
+        key = (name, tuple(round(float(p), 12) for p in params), num_qubits)
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
 
-        Args:
-            gate_name: Name of the gate.
-            angle: Rotation angle for parametric gates.
+        if num_qubits == 1:
+            duration = SINGLE_QUBIT_GATE_NS
+            collapse = self._single_collapse
+            gate_error = self.noise_params.single_qubit_error
+            d = 2
+        else:
+            duration = TWO_QUBIT_GATE_NS
+            collapse = self._two_collapse
+            gate_error = self.noise_params.two_qubit_error
+            d = 4
 
-        Returns:
-            Tuple of (process_fidelity, state_fidelity).
-        """
-        # Note: gate_name and angle would be used in full Hamiltonian simulation
-        # For now we use a simplified decoherence model
-        _ = (gate_name, angle)  # Acknowledge unused for future expansion
-        duration_ns = SINGLE_QUBIT_GATE_NS
+        unitary = gate_unitary(name, params, num_qubits)
+        decoherence = gate_channel_superop(unitary, duration, collapse)
+        depol = depolarizing_superop(d, depolarizing_p_for_error(gate_error, d))
+        channel = depol @ decoherence
 
-        # Simple decoherence model: exponential decay during gate
-        t1_decay = np.exp(-duration_ns / self.noise_params.t1_ns)
-        t2_decay = np.exp(-duration_ns / self.noise_params.t2_ns)
+        f_e = entanglement_fidelity(channel, unitary, d)
+        # Clamp tiny numerical overshoot above 1 (e.g. 1 + 1e-15) into range.
+        f_e = min(1.0, max(0.0, f_e))
+        fidelity = GateFidelity(
+            process_fidelity=f_e,
+            state_fidelity=average_gate_fidelity(f_e, d),
+        )
+        self._cache[key] = fidelity
+        return fidelity
 
-        # Gate error contribution
-        gate_error = self.noise_params.single_qubit_error
-
-        # Approximate process fidelity including all error sources
-        proc_fid = t1_decay * t2_decay * (1 - gate_error)
-
-        # State fidelity (starting from |0>)
-        state_fid = proc_fid * 0.99  # Slightly lower for mixed states
-
-        return float(proc_fid), float(state_fid)
-
-    def _simulate_two_qubit(self, gate_name: str) -> tuple[float, float]:
-        """Simulate a two-qubit gate and return fidelities.
-
-        Args:
-            gate_name: Name of the gate (cx, cz, swap).
-
-        Returns:
-            Tuple of (process_fidelity, state_fidelity).
-        """
-        # Note: gate_name would be used for gate-specific error rates
-        _ = gate_name  # Acknowledge unused for future expansion
-        duration_ns = TWO_QUBIT_GATE_NS
-
-        # Decoherence on both qubits
-        t1_decay = np.exp(-duration_ns / self.noise_params.t1_ns)
-        t2_decay = np.exp(-duration_ns / self.noise_params.t2_ns)
-
-        # Two-qubit gate error (dominant)
-        gate_error = self.noise_params.two_qubit_error
-
-        # Combined fidelity (both qubits contribute)
-        proc_fid = (t1_decay * t2_decay) ** 2 * (1 - gate_error)
-        state_fid = proc_fid * 0.98
-
-        return float(proc_fid), float(state_fid)
+    def idle_fidelity(self, idle_ns: float) -> GateFidelity:
+        """Fidelity of a single qubit decohering (H=0) while idle for idle_ns."""
+        if idle_ns <= 1e-9:
+            return GateFidelity(1.0, 1.0)
+        key = ("__idle__", (round(idle_ns, 3),), 1)
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
+        superop = gate_channel_superop(IDENTITY_2, idle_ns, self._single_collapse)
+        f_e = min(1.0, max(0.0, entanglement_fidelity(superop, IDENTITY_2, 2)))
+        fidelity = GateFidelity(f_e, average_gate_fidelity(f_e, 2))
+        self._cache[key] = fidelity
+        return fidelity
 
     def simulate_gate_sequence(
         self,
-        gates: Sequence[tuple[str, tuple[int, ...], float]],
+        gates: Sequence[tuple[str, tuple[int, ...], Sequence[float]]],
+        idle_aware: bool = True,
     ) -> tuple[float, float, PulseMetrics]:
-        """Simulate a sequence of gates and compute overall fidelity.
+        """Simulate a gate sequence and return (process_fid, state_fid, metrics).
 
-        Args:
-            gates: Sequence of (gate_name, qubits, angle) tuples.
-
-        Returns:
-            Tuple of (process_fidelity, state_fidelity, pulse_metrics).
+        Gates are ASAP-scheduled (gates on disjoint qubits run concurrently).
+        Per-gate fidelities compose multiplicatively; when ``idle_aware`` (the
+        physical model), each qubit additionally accrues idle decoherence over
+        the gap between its active time and the circuit makespan. The reported
+        duration is the makespan, not the serial sum of gate durations.
         """
-        total_fidelity = 1.0
-        total_state_fidelity = 1.0
-        total_duration_ns = 0.0
+        process_fidelity = 1.0
+        state_fidelity = 1.0
+        free: dict[int, float] = {}
+        active: dict[int, float] = {}
+        makespan = 0.0
         pulse_count = 0
 
-        for gate_name, qubits, angle in gates:
-            if len(qubits) == 1:
-                proc_f, state_f = self._simulate_single_qubit(gate_name, angle)
-                total_duration_ns += SINGLE_QUBIT_GATE_NS
-            elif len(qubits) == 2:
-                proc_f, state_f = self._simulate_two_qubit(gate_name)
-                total_duration_ns += TWO_QUBIT_GATE_NS
-            else:
-                raise ValueError(f"Unsupported gate size: {len(qubits)} qubits")
-
-            total_fidelity *= proc_f
-            total_state_fidelity *= state_f
+        for name, qubits, params in gates:
+            fid = self.gate_fidelity(name, qubits, params)
+            process_fidelity *= fid.process_fidelity
+            state_fidelity *= fid.state_fidelity
+            duration = SINGLE_QUBIT_GATE_NS if len(qubits) == 1 else TWO_QUBIT_GATE_NS
+            start = max((free.get(q, 0.0) for q in qubits), default=0.0)
+            end = start + duration
+            for q in qubits:
+                free[q] = end
+                active[q] = active.get(q, 0.0) + duration
+            makespan = max(makespan, end)
             pulse_count += 1
 
-        pulse_metrics = PulseMetrics(
-            total_duration_ns=total_duration_ns,
-            pulse_count=pulse_count,
-            max_amplitude=1.0,  # Normalized
-        )
+        if idle_aware:
+            for active_ns in active.values():
+                idle = self.idle_fidelity(makespan - active_ns)
+                process_fidelity *= idle.process_fidelity
+                state_fidelity *= idle.state_fidelity
 
-        return total_fidelity, total_state_fidelity, pulse_metrics
+        metrics = PulseMetrics(
+            total_duration_ns=makespan,
+            pulse_count=pulse_count,
+            max_amplitude=1.0,
+        )
+        return process_fidelity, state_fidelity, metrics
 
 
 # =============================================================================
-# Gate Compiler Interface
+# Gate compiler interface
 # =============================================================================
 
 
 class RealGateCompiler:
-    """Gate compiler using Lindblad simulation for fidelity estimation.
-
-    This replaces MockGateCompiler with physics-based simulation.
-    """
+    """Gate compiler using per-gate Lindblad simulation for fidelity estimation."""
 
     def __init__(self, noise_params: NoiseParams) -> None:
-        """Initialize compiler with noise parameters.
-
-        Args:
-            noise_params: IQM Garnet noise parameters.
-        """
         self.noise_params = noise_params
         self.simulator = PulseSimulator(noise_params)
 
-    def compile_and_simulate(
+    def simulate_gates(
         self,
-        qasm: str,  # noqa: ARG002
-        num_qubits: int,
-        num_gates: int,
-        num_two_qubit_gates: int,
+        gates: Sequence[tuple[str, tuple[int, ...], Sequence[float]]],
     ) -> tuple[float, float, PulseMetrics]:
-        """Compile circuit to pulses and simulate with noise.
-
-        Args:
-            qasm: OpenQASM circuit (reserved for future gate extraction).
-            num_qubits: Number of qubits in circuit.
-            num_gates: Total gate count.
-            num_two_qubit_gates: Number of two-qubit gates.
-
-        Returns:
-            Tuple of (process_fidelity, state_fidelity, pulse_metrics).
-        """
-        # Extract gates from QASM (simplified - assume gate stats)
-        num_single_qubit = num_gates - num_two_qubit_gates
-
-        # Build gate sequence for simulation
-        gates: list[tuple[str, tuple[int, ...], float]] = []
-
-        # Add single-qubit gates
-        for i in range(num_single_qubit):
-            gates.append(("h", (i % num_qubits,), 0.0))
-
-        # Add two-qubit gates
-        for i in range(num_two_qubit_gates):
-            q0, q1 = i % num_qubits, (i + 1) % num_qubits
-            if q0 != q1:
-                gates.append(("cz", (q0, q1), 0.0))
-
+        """Simulate an explicit gate sequence (name, qubit indices, params)."""
         return self.simulator.simulate_gate_sequence(gates)

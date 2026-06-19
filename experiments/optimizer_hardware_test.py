@@ -51,8 +51,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.bridge import CircuitOptimizerBridge, OptimizationResult
-from src.corpus import create_standard_corpus, CircuitType
-from src.hardware import IQMHardwareExecutor, HardwareCircuit, HardwareResult
+from src.corpus import create_standard_corpus
+from src.hardware import HardwareCircuit, HardwareResult, IQMHardwareExecutor
 
 # Configure logging
 logging.basicConfig(
@@ -397,7 +397,7 @@ def main() -> None:
 
     # Run tests
     logger.info(f"\n{'='*70}")
-    logger.info(f"STARTING OPTIMIZER + HARDWARE TEST")
+    logger.info("STARTING OPTIMIZER + HARDWARE TEST")
     logger.info(f"Circuits: {len(circuits)}")
     logger.info(f"Shots: {args.shots}")
     logger.info(f"Quantum computer: {args.quantum_computer}")
@@ -473,7 +473,7 @@ def main() -> None:
     logger.info(f"Mean fidelity improvement: {mean_fidelity_improvement:+.4f}")
     logger.info(f"Mean gate reduction: {mean_gate_reduction:.1f}%")
     logger.info(f"Mean depth reduction: {mean_depth_reduction:.1f}%")
-    logger.info(f"\nDetailed results:")
+    logger.info("\nDetailed results:")
 
     for test in tests:
         status = "✓ IMPROVED" if test.fidelity_improvement > 0 else "✗ DEGRADED"

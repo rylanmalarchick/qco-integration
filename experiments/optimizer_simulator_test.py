@@ -564,11 +564,11 @@ def main() -> None:
 
     # Run tests
     logger.info(f"\n{'='*70}")
-    logger.info(f"OPTIMIZER VALIDATION TEST (Simulator)")
+    logger.info("OPTIMIZER VALIDATION TEST (Simulator)")
     logger.info(f"Circuits: {len(circuits)}")
     logger.info(f"Shots: {args.shots}")
     logger.info(f"Passes: {passes}")
-    logger.info(f"Noise model: IQM Garnet")
+    logger.info("Noise model: IQM Garnet")
     logger.info(f"{'='*70}\n")
 
     tests = []
@@ -640,7 +640,7 @@ def main() -> None:
     logger.info(f"Mean fidelity improvement: {mean_fidelity_improvement:+.4f}")
     logger.info(f"Mean gate reduction: {mean_gate_reduction:.1f}%")
     logger.info(f"Mean depth reduction: {mean_depth_reduction:.1f}%")
-    logger.info(f"\nDetailed results:")
+    logger.info("\nDetailed results:")
 
     for test in tests:
         status = "✓ IMPROVED" if test.fidelity_improvement > 0 else "✗ DEGRADED"

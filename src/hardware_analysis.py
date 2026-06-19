@@ -15,7 +15,7 @@ import logging
 import statistics
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -41,7 +41,7 @@ class ComparisonMetrics:
 class HardwareSimulationComparison:
     """Comprehensive comparison between hardware and simulation results."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize comparison analyzer."""
         self.comparisons: list[ComparisonMetrics] = []
         self.circuit_groups: dict[str, list[ComparisonMetrics]] = {}
@@ -114,7 +114,7 @@ class HardwareSimulationComparison:
         hd_distances = [c.hellinger_distance for c in self.comparisons]
         tvd_distances = [c.total_variation_distance for c in self.comparisons]
 
-        stats = {
+        stats: dict[str, Any] = {
             "num_comparisons": len(self.comparisons),
             "hardware_fidelity": {
                 "mean": statistics.mean(hw_fidelities),
@@ -156,7 +156,7 @@ class HardwareSimulationComparison:
                 "hardware_fidelity_mean": statistics.mean(type_hw_fids),
                 "simulated_fidelity_mean": statistics.mean(type_sim_fids),
                 "fidelity_difference_mean": statistics.mean(
-                    [h - s for h, s in zip(type_hw_fids, type_sim_fids)]
+                    [h - s for h, s in zip(type_hw_fids, type_sim_fids, strict=True)]
                 ),
             }
 

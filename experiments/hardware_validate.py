@@ -42,8 +42,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.corpus import create_standard_corpus
 from src.hardware import HardwareCircuit, IQMHardwareExecutor, create_validation_report
-from src.pipeline import create_real_pipeline
 from src.metrics import NoiseParams
+from src.pipeline import create_real_pipeline
 
 # Configure logging
 logging.basicConfig(
@@ -180,22 +180,28 @@ def main() -> None:
         hw_results = executor.execute(circuits_to_validate, shots=args.shots, backend=args.backend)
         logger.info(f"Successfully executed {len(hw_results)} circuits")
     except Exception as e:
-        logger.error(f"Hardware execution failed: {e}")
-        logger.error("Make sure IQM_CLIENT_ID and IQM_CLIENT_SECRET are set")
+        logger.exception(f"Hardware execution failed: {e}")
+        logger.exception("Make sure IQM_CLIENT_ID and IQM_CLIENT_SECRET are set")
         return
 
     logger.info("")
 
-    # Compute simulation fidelities for comparison
-    logger.info("Computing simulated fidelities for comparison...")
-    pipeline = create_real_pipeline(noise_params=DEFAULT_NOISE, default_topology="iqm-garnet")
+    # Compute simulated fidelities with the validated Lindblad pipeline so the
+    # report compares hardware against real model predictions, not a placeholder.
+    logger.info("Computing simulated fidelities (validated Lindblad pipeline)...")
+    sim_pipeline = create_real_pipeline(noise_params=DEFAULT_NOISE, default_topology="iqm-garnet")
 
     sim_fidelities = {}
     for hw_result in hw_results:
         try:
-            # This is a simplified estimate - would need full pipeline execution for real comparison
-            sim_fidelities[hw_result.circuit_name] = 0.85  # Placeholder
-        except Exception as e:
+            sim_result = sim_pipeline.run(
+                circuit=hw_result.circuit_qasm,
+                passes=["cancel", "commute", "rotate", "identity"],
+                circuit_name=hw_result.circuit_name,
+                route=True,
+            )
+            sim_fidelities[hw_result.circuit_name] = sim_result.process_fidelity
+        except Exception as e:  # noqa: BLE001 - record per-circuit failure, keep comparing the rest
             logger.warning(f"Could not compute simulation fidelity for {hw_result.circuit_name}: {e}")
             sim_fidelities[hw_result.circuit_name] = 0.0
 

@@ -18,12 +18,11 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import statistics
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-import statistics
 
 # Add src to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -168,7 +167,7 @@ class ValidationReportGenerator:
                 "hardware_fidelity_mean": statistics.mean(hw_fids),
                 "simulated_fidelity_mean": statistics.mean(sim_fids),
                 "fidelity_difference_mean": statistics.mean(
-                    [h - s for h, s in zip(hw_fids, sim_fids)]
+                    [h - s for h, s in zip(hw_fids, sim_fids, strict=False)]
                 ),
                 "avg_execution_time_ms": (
                     statistics.mean(metrics["timings"]) if metrics["timings"] else 0.0
@@ -286,7 +285,7 @@ class ValidationReportGenerator:
 <body>
     <div class="container">
         <h1>🔬 Hardware Validation Report</h1>
-        
+
         <h2>📊 Overall Statistics</h2>
         <div class="metric-grid">
             <div class="metric-card">

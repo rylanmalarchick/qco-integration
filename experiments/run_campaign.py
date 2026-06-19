@@ -39,7 +39,12 @@ from src.analysis import (  # noqa: E402
     generate_experiment_summary,
 )
 from src.bridge import MockCircuitOptimizerBridge  # noqa: E402
-from src.corpus import CircuitCorpus, create_paper_corpus, create_small_corpus, create_standard_corpus  # noqa: E402
+from src.corpus import (  # noqa: E402
+    CircuitCorpus,
+    create_paper_corpus,
+    create_small_corpus,
+    create_standard_corpus,
+)
 from src.metrics import EndToEndResult, NoiseParams  # noqa: E402
 from src.pipeline import EndToEndPipeline, MockGateCompiler, create_real_pipeline  # noqa: E402
 from src.runner import BenchmarkRunner, ExperimentConfig, ExperimentResults  # noqa: E402

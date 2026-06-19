@@ -3,17 +3,13 @@
 This module provides utilities for generating and managing a diverse set
 of benchmark circuits for experimental analysis.
 
-Circuit types (per SCOPE_OF_WORK.md Phase 2):
-- VQE circuits (extracted from QuantumVQE)
+Circuit types:
 - QFT (various sizes: 4, 8, 12, 16, 20 qubits)
 - QAOA (MaxCut, various graph sizes)
 - GHZ states
 - Random circuits (controlled depth/gate density)
 
-Following AgentBible principles:
-- Type hints on all functions
-- Clear documentation with references
-- Reproducible circuit generation (fixed seeds)
+Generation is reproducible via fixed seeds.
 """
 
 from __future__ import annotations
@@ -659,7 +655,7 @@ def create_paper_corpus(seed: int = 42) -> CircuitCorpus:
 
     # --- QAOA: 50 circuits (10 qubit sizes × 5 parameter configs) ---
     qaoa_qubits = [3, 4, 5, 6, 7, 8, 10, 12, 14, 16]
-    qaoa_configs = [
+    qaoa_configs: list[dict[str, Any]] = [
         {"gamma": 0.3, "beta": 0.5, "layers": 1, "seed": seed + 100},
         {"gamma": 0.7, "beta": 0.5, "layers": 1, "seed": seed + 200},
         {"gamma": 0.5, "beta": 0.3, "layers": 1, "seed": seed + 300},

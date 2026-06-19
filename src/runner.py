@@ -1,13 +1,8 @@
 """BenchmarkRunner: Automated experiment execution.
 
 This module provides utilities for running systematic experiments
-with configuration-driven settings, parallel execution, and
-results persistence.
-
-Following AgentBible principles:
-- Configuration-driven (no hardcoded experiments)
-- Results persistence (JSON/Parquet)
-- Reproducible execution with seed tracking
+with configuration-driven settings, parallel execution, and results
+persistence (JSON/Parquet). Seeds are tracked for reproducibility.
 """
 
 from __future__ import annotations
@@ -323,7 +318,10 @@ class BenchmarkRunner:
                 duration_seconds=duration,
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - sweep must record any per-circuit failure and continue
+            # A campaign runs hundreds of circuits; one circuit's failure (parse
+            # error, optimizer crash, numerical issue) is captured as a result
+            # row, not allowed to abort the whole sweep.
             duration = (datetime.now() - start_time).total_seconds()
             logger.warning(f"Error running {circuit_name} with {passes}: {e}")
 

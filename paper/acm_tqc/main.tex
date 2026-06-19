@@ -1,4 +1,4 @@
-\documentclass[acmlarge,nonacm]{acmart}
+\documentclass[sigconf,nonacm]{acmart}
 
 % Journal metadata
 \acmJournal{TQC}
@@ -373,15 +373,7 @@ The high variance in process fidelity ($\sigma = 0.326$) reflects the diversity 
 
 \subsection{Pass Effectiveness}
 
-Figure~\ref{fig:pass} shows the comparative effectiveness of each optimization pass, and Table~\ref{tab:passes} provides the detailed breakdown. Gate cancellation emerges as the dominant pass, eliminating 3{,}780 gates across the corpus (run in isolation) with 72.0\% of circuits showing improvement.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/pass_effectiveness.pdf}
-    \caption{Optimization pass effectiveness measured by net gate reduction. Error bars indicate standard deviation across the circuit corpus. Gate cancellation dominates, removing 3{,}780 gates.}
-    \label{fig:pass}
-    \Description{Bar chart comparing net gate reduction across four optimization passes, with gate cancellation showing the largest reduction.}
-\end{figure}
+Table~\ref{tab:passes} breaks down the comparative effectiveness of each optimization pass. Gate cancellation emerges as the dominant pass, eliminating 3{,}780 gates across the corpus (run in isolation) with 72.0\% of circuits showing improvement.
 
 \begin{table}[t]
 \centering
@@ -547,7 +539,7 @@ QCO dominates on \emph{structured} circuits:
 
 \subsection{Head-to-Head Analysis}
 
-On a per-circuit basis for two-qubit gate reduction, Qiskit-L3-IQM wins on 188 circuits, QCO wins on 57, and 126 are tied. This reflects the corpus composition: 303 of 371 circuits are random, where Qiskit has an advantage. On the 68 structured circuits (GHZ, QFT, QAOA), QCO provides substantially better or equal two-qubit gate reduction. Figure~\ref{fig:compiler-2q} visualizes this breakdown by circuit type, and Figure~\ref{fig:compiler-heatmap} provides a heatmap view across all compiler configurations.
+On a per-circuit basis for two-qubit gate reduction, Qiskit-L3-IQM wins on 188 circuits, QCO wins on 57, and 126 are tied. This reflects the corpus composition: 303 of 371 circuits are random, where Qiskit has an advantage. On the 68 structured circuits (GHZ, QFT, QAOA), QCO provides substantially better or equal two-qubit gate reduction. Figure~\ref{fig:compiler-2q} visualizes this breakdown by circuit type.
 
 \begin{figure}[t]
     \centering
@@ -555,14 +547,6 @@ On a per-circuit basis for two-qubit gate reduction, Qiskit-L3-IQM wins on 188 c
     \caption{Two-qubit gate reduction by circuit type and compiler. QCO achieves near-complete elimination of two-qubit gates on QAOA (100\%) and QFT (87.8\%) circuits, while Qiskit performs better on random circuits.}
     \label{fig:compiler-2q}
     \Description{Grouped bar chart comparing two-qubit gate reduction percentages across circuit types for QCO and Qiskit compiler configurations.}
-\end{figure}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/compiler_heatmap_2q.pdf}
-    \caption{Heatmap of two-qubit gate reduction across circuit types and compiler configurations. Warmer colors indicate greater reduction.}
-    \label{fig:compiler-heatmap}
-    \Description{Heatmap showing two-qubit gate reduction across circuit types and compiler configurations with color intensity indicating reduction magnitude.}
 \end{figure}
 
 \subsection{Implications}
@@ -600,16 +584,7 @@ identity & 0.0\% & 0.0\% & 0.525 & 0.00 \\
 \end{tabular}
 \end{table}
 
-The cancellation pass alone achieves a large effect ($d = 1.66$), reducing gate count by 9.1\% and two-qubit gate count by 2.6\% in isolation, with a corresponding increase in mean process fidelity from 0.525 (baseline) to 0.537. The remaining three passes produce negligible effects in isolation ($d < 0.2$ for all). Figure~\ref{fig:ablation-cumulative} shows the cumulative effect as passes are added sequentially.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/ablation_cumulative.pdf}
-    \caption{Cumulative ablation: gate reduction and fidelity as passes are added sequentially. The cancellation pass provides the dominant contribution.}
-    \label{fig:ablation-cumulative}
-    \Description{Line chart showing cumulative gate reduction and fidelity as optimization passes are added sequentially.}
-\end{figure}
-
+The cancellation pass alone achieves a large effect ($d = 1.66$), reducing gate count by 9.1\% and two-qubit gate count by 2.6\% in isolation, with a corresponding increase in mean process fidelity from 0.525 (baseline) to 0.537. The remaining three passes produce negligible effects in isolation ($d < 0.2$ for all).
 \subsection{Leave-One-Out Analysis}
 
 The leave-one-out analysis removes each pass from the full four-pass pipeline to measure its marginal contribution (Table~\ref{tab:ablation-loo}).
@@ -668,12 +643,7 @@ The Kruskal--Wallis test yields $H = 6.05$, $p = 0.302$, indicating \emph{no sig
 
 \subsection{Summary of Ablation Findings}
 
-The ablation study leads to three conclusions:
-\begin{enumerate}
-    \item The cancellation pass provides essentially all of the optimization value, with a large effect size ($d = 1.66$). Other passes contribute marginally.
-    \item Two-qubit gate reduction is determined entirely by the cancellation pass and is invariant to pass ordering and composition.
-    \item Pass ordering has no statistically significant effect ($p = 0.302$), simplifying compiler design.
-\end{enumerate}
+The ablation study leads to three conclusions. The cancellation pass provides essentially all of the optimization value, with a large effect size ($d = 1.66$), while the other passes contribute only marginally. Two-qubit gate reduction is determined entirely by the cancellation pass and is invariant to pass ordering and composition. And because pass ordering has no statistically significant effect ($p = 0.302$), compiler design is correspondingly simplified.
 
 These results suggest that for the circuit types and optimization passes studied, a compiler need only implement gate cancellation to capture the vast majority of optimization benefit. The other three passes add complexity without meaningfully improving hardware-relevant metrics.
 
@@ -699,7 +669,7 @@ Fidelity is estimated from measurement counts as the empirical probability of th
 
 \subsection{Results}
 
-Table~\ref{tab:hw-results} reports, for each circuit, the measured hardware fidelity alongside the validated Lindblad model's prediction. Figures~\ref{fig:hw} and~\ref{fig:hw-gap} visualize the comparison.
+Table~\ref{tab:hw-results} reports, for each circuit, the measured hardware fidelity alongside the validated Lindblad model's prediction. Figure~\ref{fig:hw-gap} visualizes the comparison.
 
 \begin{table}[t]
 \centering
@@ -722,14 +692,6 @@ rand\_4q\,(d10) & 0.069 & 0.853 & 0.784 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig_hardware_vs_sim.pdf}
-    \caption{Validated simulation versus measured hardware fidelity per circuit on IQM Garnet. The model captures the relative ordering of circuits but overestimates absolute fidelity in every case.}
-    \label{fig:hw}
-    \Description{Grouped bar chart comparing simulated and measured hardware fidelity for eight circuits, with simulation consistently higher.}
-\end{figure}
 
 \begin{figure}[t]
     \centering
